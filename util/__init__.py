@@ -7,6 +7,5 @@ Created on 2014/07/04
 
 import time
 
-def ts():
+def timstamp():
     return int(time.time() * 1000)
-    

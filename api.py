@@ -5,6 +5,7 @@ Created on 2014/06/27
 @author: deadblue
 '''
 
+from util.url import HTTPErrorProcessor2
 import base64
 import cookielib
 import inspect
@@ -17,6 +18,7 @@ import rsa
 import urllib
 import urllib2
 import util
+import pickle
 
 _BAIDU_APP_ID = 250528
 
@@ -29,7 +31,7 @@ def baidu_api(url, method):
                     ('bdstoken', obj.api_token),
                     ('clienttype', 0),
                     ('web', 1),
-                    ('_', util.ts()),
+                    ('_', util.timstamp()),
                     ]
             call_args = inspect.getcallargs(func, obj, *args, **kwargs)
             for arg in call_args.items():
@@ -43,18 +45,35 @@ def baidu_api(url, method):
 
 class LoginException(Exception):
     def __init__(self, errno):
-        self.erron
+        self.erron = errno
+    def __str__(self, *args, **kwargs):
+        return 'login error: %d' % self.erron
 
 class BaiduClient():
 
     def __init__(self):
-        # load cookie from file
+        # 从文件加载cookie
         cookie_file = os.path.join(os.getenv('HOME'), '.baidu_lixian.cookie')
         self._cookie_jar = cookielib.LWPCookieJar(cookie_file)
         if os.path.exists(cookie_file): self._cookie_jar.load()
-        # init url opener
+        # 初始化urlopner
         cookie_handler = urllib2.HTTPCookieProcessor(self._cookie_jar)
-        self._url_opener = urllib2.build_opener(cookie_handler)
+        self._url_opener = urllib2.build_opener(cookie_handler, HTTPErrorProcessor2())
+        # 加载配置文件
+        self._load_config()
+    
+    def _load_config(self):
+        self.api_token = ''
+        self.xss_key = ''
+        config_file = os.path.join(os.getenv('HOME'), '.baidu_lixian.config')
+        if os.path.exists(config_file):
+            config = pickle.load(open(config_file, 'r'))
+            self.api_token = config['api_token']
+            self.xss_key = config['xss_key']
+
+    def _save_config(self, config):
+        config_file = os.path.join(os.getenv('HOME'), '.baidu_lixian.config')
+        pickle.dump(config, open(config_file, 'w'))
 
     def _execute_request(self, url, data=None, method='GET'):
         '''
@@ -74,7 +93,15 @@ class BaiduClient():
         resp = self._url_opener.open(req)
         return resp
 
+    def is_login(self):
+        resp = self._execute_request('http://pan.baidu.com/disk/home')
+        print resp.code
+        return resp.code != 302
+
     def _get_login_token(self):
+        '''
+        获取登陆用token
+        '''
         # 需要先访问网盘首页，获得一个cookie
         self._execute_request('http://pan.baidu.com/')
         # 请求token
@@ -83,7 +110,7 @@ class BaiduClient():
         data = [
                 ('tpl', 'netdisk'),
                 ('apiver', 'v3'),
-                ('tt', util.ts()),
+                ('tt', util.timstamp()),
                 ('class', 'login'),
                 ('logintype', 'basicLogin'),
                 ('callback', cbs)
@@ -93,26 +120,32 @@ class BaiduClient():
         result = json.loads(result)
         return result['data']['token']
     def _login_check(self, token, account):
+        '''
+        登陆检查，访问该页面主要是为了获取cookie
+        '''
         cbs = 'bd__cbs__%s' % _random_str()
         url = 'https://passport.baidu.com/v2/api/?logincheck'
         data = [
                 ('token', token),
                 ('tpl', 'netdisk'),
                 ('apiver', 'v3'),
-                ('tt', util.ts()),
+                ('tt', util.timstamp()),
                 ('username', account),
                 ('isphone', 'false'),
                 ('callback', cbs)
                 ]
         self._execute_request(url, data)
     def _get_public_key(self, token):
+        '''
+        获取加密密码用的rsa公钥
+        '''
         cbs = 'bd__cbs__%s' % _random_str()
         url = 'https://passport.baidu.com/v2/getpublickey'
         data = [
                 ('token', token),
                 ('tpl', 'netdisk'),
                 ('apiver', 'v3'),
-                ('tt', util.ts()),
+                ('tt', util.timstamp()),
                 ('callback', cbs),
                 ]
         resp = self._execute_request(url, data)
@@ -125,7 +158,7 @@ class BaiduClient():
                 'tpl' : 'netdisk',
                 'subpro' : '',
                 'apiver' : 'v3',
-                'tt' : util.ts(),
+                'tt' : util.timstamp(),
                 'codestring' : '',
                 'safeflg' : '0',
                 'u' : 'http://pan.baidu.com/',
@@ -150,40 +183,43 @@ class BaiduClient():
         # 发送登陆请求
         url = 'https://passport.baidu.com/v2/api/?login'
         resp = self._execute_request(url, data, 'POST')
+        # 解析登陆结果
         m = re.search('err_no=(\d+)&', resp.read())
         if m is not None:
-            errno = int(m.group(1))
-            if errno > 0: raise LoginException(errno)
+            err_no = int(m.group(1))
+            if err_no > 0: raise LoginException(err_no)
         else:
             raise LoginException(-1)
         logging.debug('login successed!')
         self._cookie_jar.save()
+    def _get_api_parameter(self):
+        '''
+        获取后续API调用需要的参数
+        '''
+        url = 'http://pan.baidu.com/disk/home'
+        resp = self._execute_request(url)
+        html = resp.read()
+        # 获取api token
+        m = re.search(r'yunData.MYBDSTOKEN = "(\w+)"', html)
+        if m is not None:
+            self.api_token = m.group(1)
+        # 获取xss key，通过flash上传时需要传入
+        m = re.search(r'yunData.MYBDUSS = "([^"]+)"', html)
+        if m is not None:
+            self.xss_key = m.group(1)
+        self._save_config({
+                           'api_token' : self.api_token,
+                           'xss_key' : self.xss_key
+                           })
     def login(self, account, password):
-        # 获取登陆用token
         token = self._get_login_token()
         logging.debug('login token: %s' % token)
-        # 访问logincheck，获取必要的cookie
         self._login_check(token, account)
-        # 获取rsa公钥，用来加密密码
         key_info = self._get_public_key(token)
-        # 执行登陆
         self._do_login(account, password, token, key_info)
         # 读取API必要的参数
         self._get_api_parameter()
 
-    def _get_api_parameter(self):
-        url = 'http://pan.baidu.com/disk/home'
-        resp = self._execute_request(url)
-        html = resp.read()
-        # todo: match api token from html
-        m = re.search(r'yunData.MYBDSTOKEN = "(\w+)"', html)
-        if m is not None:
-            self.api_token = m.group(1)
-            logging.debug('api token: %s' % self.api_token)
-        m = re.search(r'yunData.MYBDUSS = "([^"]+)"', html)
-        if m is not None:
-            self.xss_key = m.group(1)
-            logging.debug('xss key: %s' % self.xss_key)
     
     @baidu_api('http://pan.baidu.com/api/quota', 'GET')
     def quota(self, checkexpire=1, checkfree=1):
