@@ -5,28 +5,31 @@ Created on 2014/06/27
 @author: deadblue
 '''
 
-from util.url import HTTPErrorProcessor2
+from baidupan import util
 import base64
 import cookielib
 import inspect
 import json
 import logging # @UnusedImport
 import os
+import pickle
 import random
 import re
 import rsa
 import urllib
 import urllib2
-import util
-import pickle
 
-_BAIDU_APP_ID = 250528
+__all__ = ['BaiduPanClient']
 
-def baidu_api(url, method):
+_APP_ID = 250528
+_API_HOST = 'http://pan.baidu.com/api/'
+
+def api(path, method='GET'):
+    url = '%s%s' % (_API_HOST, path)
     def invoker_creator(func):
         def invoker(obj, *args, **kwargs):
             data = [
-                    ('app_id', _BAIDU_APP_ID),
+                    ('app_id', _APP_ID),
                     ('channel', 'chunlei'),
                     ('bdstoken', obj.api_token),
                     ('clienttype', 0),
@@ -49,8 +52,7 @@ class LoginException(Exception):
     def __str__(self, *args, **kwargs):
         return 'login error: %d' % self.erron
 
-class BaiduClient():
-
+class BaiduPanClient():
     def __init__(self):
         # 从文件加载cookie
         cookie_file = os.path.join(os.getenv('HOME'), '.baidu_lixian.cookie')
@@ -58,7 +60,7 @@ class BaiduClient():
         if os.path.exists(cookie_file): self._cookie_jar.load()
         # 初始化urlopner
         cookie_handler = urllib2.HTTPCookieProcessor(self._cookie_jar)
-        self._url_opener = urllib2.build_opener(cookie_handler, HTTPErrorProcessor2())
+        self._url_opener = urllib2.build_opener(cookie_handler)
         # 加载配置文件
         self._load_config()
     
@@ -93,11 +95,6 @@ class BaiduClient():
         resp = self._url_opener.open(req)
         return resp
 
-    def is_login(self):
-        resp = self._execute_request('http://pan.baidu.com/disk/home')
-        print resp.code
-        return resp.code != 302
-
     def _get_login_token(self):
         '''
         获取登陆用token
@@ -105,7 +102,7 @@ class BaiduClient():
         # 需要先访问网盘首页，获得一个cookie
         self._execute_request('http://pan.baidu.com/')
         # 请求token
-        cbs = 'bd__cbs__%s' % _random_str()
+        cbs = 'bd__cbs__%s' % util.random_str(6)
         url = 'https://passport.baidu.com/v2/api/?getapi'
         data = [
                 ('tpl', 'netdisk'),
@@ -123,7 +120,7 @@ class BaiduClient():
         '''
         登陆检查，访问该页面主要是为了获取cookie
         '''
-        cbs = 'bd__cbs__%s' % _random_str()
+        cbs = 'bd__cbs__%s' % util.random_str(6)
         url = 'https://passport.baidu.com/v2/api/?logincheck'
         data = [
                 ('token', token),
@@ -139,7 +136,7 @@ class BaiduClient():
         '''
         获取加密密码用的rsa公钥
         '''
-        cbs = 'bd__cbs__%s' % _random_str()
+        cbs = 'bd__cbs__%s' % util.random_str(6)
         url = 'https://passport.baidu.com/v2/getpublickey'
         data = [
                 ('token', token),
@@ -171,7 +168,7 @@ class BaiduClient():
                 'mem_pass' : 'on',
                 'crypttype' : '12',
                 'ppui_logintime' : random.randint(5000, 10000),
-                'callback' : 'parent.bd__cbs__%s' % _random_str(),
+                'callback' : 'parent.bd__cbs__%s' % util.random_str(6),
                 'username' : account,
                 'token' : token,
                 'rsakey' : key_info['key']
@@ -219,11 +216,10 @@ class BaiduClient():
         self._do_login(account, password, token, key_info)
         # 读取API必要的参数
         self._get_api_parameter()
-
     
-    @baidu_api('http://pan.baidu.com/api/quota', 'GET')
+    @api('quota')
     def quota(self, checkexpire=1, checkfree=1):
         pass
-
-def _random_str():
-    return '%x' % random.randint(0x100000, 0xffffff)
+    @api('list')
+    def list(self, dir, num=100, page=1, order='time', desc=1, showempty=0):  # @ReservedAssignment
+        pass
