@@ -19,28 +19,39 @@ import rsa
 import urllib
 import urllib2
 
-__all__ = ['BaiduPanClient']
+__all__ = ['BaiduPanClient', 'LoginException']
 
 _APP_ID = 250528
 _API_HOST = 'http://pan.baidu.com/api/'
 
-def api(path, method='GET'):
+def rest_api(path, preset={}, post_field=[]):
     url = '%s%s' % (_API_HOST, path)
     def invoker_creator(func):
         def invoker(obj, *args, **kwargs):
-            data = [
-                    ('app_id', _APP_ID),
-                    ('channel', 'chunlei'),
-                    ('bdstoken', obj.api_token),
-                    ('clienttype', 0),
-                    ('web', 1),
-                    ('_', util.timstamp()),
-                    ]
+            # 必要参数
+            get_data = {
+                    'app_id' : _APP_ID,
+                    'channel' : 'chunlei',
+                    'bdstoken' : obj.api_token,
+                    'clienttype' : 0,
+                    'web' : 1,
+                    '_': util.timstamp()
+                    }
+            # 处理API预设参数
+            if preset: get_data.update(preset)
+            # 处理传入的参数
             call_args = inspect.getcallargs(func, obj, *args, **kwargs)
-            for arg in call_args.items():
-                if arg[0] == 'self' or arg[1] is None: continue
-                data.append(arg)
-            resp = obj._execute_request(url, data, method)
+            for k,v in call_args.items():
+                if k == 'self' or v is None: continue
+                get_data[k] = v
+            # 处理需要post的参数
+            post_data = {}
+            if post_field:
+                for field in post_field:
+                    if not get_data.has_key(field): continue
+                    post_data[field] = get_data[field]
+                    del get_data[field]
+            resp = obj._execute_request(url, get_data, post_data)
             result = json.load(resp)
             return result
         return invoker
@@ -76,20 +87,16 @@ class BaiduPanClient():
     def _save_config(self, config):
         config_file = os.path.join(os.getenv('HOME'), '.baidu_lixian.config')
         pickle.dump(config, open(config_file, 'w'))
-
-    def _execute_request(self, url, data=None, method='GET'):
-        '''
-        执行http请求
-        '''
-        if method == 'GET':
-            if data:
-                sep = '?' if url.find('?') < 0 else '&'
-                url = '%s%s%s' % (url, sep, urllib.urlencode(data))
-            req = urllib2.Request(url)
-        else:
-            req = urllib2.Request(url)
-            if data:
-                req.add_data(urllib.urlencode(data))
+        pass
+    
+    def _execute_request(self, url, get_data=None, post_data=None):
+        if get_data:
+            get_data = urllib.urlencode(get_data)
+            sep = '?' if url.find('?') < 0 else '&'
+            url = '%s%s%s' % (url, sep, get_data)
+        req = urllib2.Request(url)
+        if post_data and len(post_data) > 0:
+            req.add_data(urllib.urlencode(post_data))
         req.add_header('User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36')
         req.add_header('Referer', 'http://pan.baidu.com/disk/home')
         resp = self._url_opener.open(req)
@@ -112,7 +119,7 @@ class BaiduPanClient():
                 ('logintype', 'basicLogin'),
                 ('callback', cbs)
                 ]
-        resp = self._execute_request(url, data, 'GET')
+        resp = self._execute_request(url, data)
         result = (resp.read()[len(cbs)+1:-1]).replace('\'', '"')
         result = json.loads(result)
         return result['data']['token']
@@ -179,7 +186,7 @@ class BaiduPanClient():
         data['password'] = base64.b64encode(rsa.encrypt(password, pubkey))
         # 发送登陆请求
         url = 'https://passport.baidu.com/v2/api/?login'
-        resp = self._execute_request(url, data, 'POST')
+        resp = self._execute_request(url, None, data)
         # 解析登陆结果
         m = re.search('err_no=(\d+)&', resp.read())
         if m is not None:
@@ -216,10 +223,16 @@ class BaiduPanClient():
         self._do_login(account, password, token, key_info)
         # 读取API必要的参数
         self._get_api_parameter()
-    
-    @api('quota')
+
+    @rest_api('quota')
     def quota(self, checkexpire=1, checkfree=1):
         pass
-    @api('list')
+    @rest_api('list')
     def list(self, dir, num=100, page=1, order='time', desc=1, showempty=0):  # @ReservedAssignment
+        pass
+    @rest_api('create', preset={'a':'commit', 'isdir':1, 'size':'', 'method':'post'}, post_field=['path', 'isdir', 'size', 'block_list', 'method'])
+    def create_dir(self, path):
+        pass
+    @rest_api('filemanager', preset={'opera':'delete'}, post_field=['filelist'])
+    def delete_files(self, filelist):
         pass
