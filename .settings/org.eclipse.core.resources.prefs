@@ -2,6 +2,7 @@ eclipse.preferences.version=1
 encoding//baidupan/__init__.py=utf-8
 encoding//baidupan/api.py=utf-8
 encoding//baidupan/command.py=utf-8
+encoding//baidupan/conf.py=utf-8
 encoding//baidupan/console.py=utf-8
 encoding//baidupan/http.py=utf-8
 encoding//baidupan/share.py=utf-8

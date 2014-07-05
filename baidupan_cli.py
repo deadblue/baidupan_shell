@@ -6,11 +6,12 @@ Created on 2014/07/05
 @author: deadblue
 '''
 
+from baidupan import conf
 from baidupan.console import Console
 import atexit
 
 def on_exit():
-    pass
+    conf.save()
 
 if __name__ == '__main__':
     atexit.register(on_exit)

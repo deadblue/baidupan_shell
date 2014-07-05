@@ -5,14 +5,13 @@ Created on 2014/06/27
 @author: deadblue
 '''
 
-from baidupan import util
+from baidupan import util, conf
 import base64
 import cookielib
 import inspect
 import json
 import logging # @UnusedImport
 import os
-import pickle
 import random
 import re
 import rsa
@@ -73,21 +72,8 @@ class BaiduPanClient():
         cookie_handler = urllib2.HTTPCookieProcessor(self._cookie_jar)
         self._url_opener = urllib2.build_opener(cookie_handler)
         # 加载配置文件
-        self._load_config()
-    
-    def _load_config(self):
-        self.api_token = ''
-        self.xss_key = ''
-        config_file = os.path.join(os.getenv('HOME'), '.baidu_lixian.config')
-        if os.path.exists(config_file):
-            config = pickle.load(open(config_file, 'r'))
-            self.api_token = config['api_token']
-            self.xss_key = config['xss_key']
-
-    def _save_config(self, config):
-        config_file = os.path.join(os.getenv('HOME'), '.baidu_lixian.config')
-        pickle.dump(config, open(config_file, 'w'))
-        pass
+        self.api_token = conf.get('api_token')
+        self.xss_key = conf.get('xss_key')
     
     def _execute_request(self, url, get_data=None, post_data=None):
         if get_data:
@@ -211,10 +197,7 @@ class BaiduPanClient():
         m = re.search(r'yunData.MYBDUSS = "([^"]+)"', html)
         if m is not None:
             self.xss_key = m.group(1)
-        self._save_config({
-                           'api_token' : self.api_token,
-                           'xss_key' : self.xss_key
-                           })
+        conf.save()
     def login(self, account, password):
         token = self._get_login_token()
         logging.debug('login token: %s' % token)
