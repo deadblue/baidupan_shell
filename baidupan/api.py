@@ -5,7 +5,7 @@ Created on 2014/06/27
 @author: deadblue
 '''
 
-from baidupan import util, conf
+from baidupan import util, config
 import base64
 import cookielib
 import inspect
@@ -72,8 +72,8 @@ class BaiduPanClient():
         cookie_handler = urllib2.HTTPCookieProcessor(self._cookie_jar)
         self._url_opener = urllib2.build_opener(cookie_handler)
         # 加载配置文件
-        self.api_token = conf.get('api_token')
-        self.xss_key = conf.get('xss_key')
+        self.api_token = config.get('api_token')
+        self.xss_key = config.get('xss_key')
     
     def _execute_request(self, url, get_data=None, post_data=None):
         if get_data:
@@ -219,3 +219,5 @@ class BaiduPanClient():
     @rest_api('filemanager', preset={'opera':'delete'}, post_field=['filelist'])
     def delete_files(self, filelist):
         pass
+
+client = BaiduPanClient()
