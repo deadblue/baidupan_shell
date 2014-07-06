@@ -68,7 +68,7 @@ class BaiduPanClient():
         cookie_file = os.path.join(os.getenv('HOME'), '.baidu_lixian.cookie')
         self._cookie_jar = cookielib.LWPCookieJar(cookie_file)
         if os.path.exists(cookie_file): self._cookie_jar.load()
-        # 初始化urlopner
+        # 初始化urlopener
         cookie_handler = urllib2.HTTPCookieProcessor(self._cookie_jar)
         self._url_opener = urllib2.build_opener(cookie_handler)
         # 加载配置文件
@@ -178,6 +178,7 @@ class BaiduPanClient():
         if m is not None:
             err_no = int(m.group(1))
             if err_no > 0: raise LoginException(err_no)
+            # TODO: err_no=257 表示需要输入验证码，后续将处理这种情况
         else:
             raise LoginException(-1)
         logging.debug('login successed!')
@@ -193,11 +194,13 @@ class BaiduPanClient():
         m = re.search(r'yunData.MYBDSTOKEN = "(\w+)"', html)
         if m is not None:
             self.api_token = m.group(1)
+            config.put(config.API_TOKEN, self.api_token)
         # 获取xss key，通过flash上传时需要传入
         m = re.search(r'yunData.MYBDUSS = "([^"]+)"', html)
         if m is not None:
             self.xss_key = m.group(1)
-        conf.save()
+            config.put(config.XSS_KEY, self.xss_key)
+        config.save()
     def login(self, account, password):
         token = self._get_login_token()
         logging.debug('login token: %s' % token)

@@ -10,6 +10,9 @@ import pickle
 
 __all__ = ['put', 'get', 'save']
 
+API_TOKEN = 'api_token'
+XSS_KEY = 'xss_key'
+
 class _Config():
     '''
     需要持久化存储的内容
