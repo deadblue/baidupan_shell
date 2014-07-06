@@ -50,6 +50,21 @@ class ChangeDirectoryCommand(Command):
         pwd = '%s%s/' % (pwd, arg)
         context.put(context.PWD, pwd)
 
+class LocalChangeDirectoryCommand(Command):
+    def __init__(self):
+        Command.__init__(self, 'lcd')
+    def execute(self, arg=None):
+        if arg is None:
+            raise InvalidArgumentException()
+        context.put(context.LWD, arg)
+
+class MakeDirectoryCommand(Command):
+    def __init__(self):
+        Command.__init__(self, 'mkdir')
+    def execute(self, arg=None):
+        # TODO: 实现创建目录
+        pass
+
 class RemoveFileCommand(Command):
     def __init__(self):
         Command.__init__(self, 'rm')

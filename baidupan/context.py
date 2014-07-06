@@ -6,6 +6,7 @@ Created on 2014/07/06
 '''
 
 PWD = 'pwd'
+LWD = 'lwd'
 
 class _Context():
     '''
@@ -13,7 +14,8 @@ class _Context():
     '''
     def __init__(self):
         self._cache = {
-                       PWD : '/'
+                       PWD : '/',
+                       LWD : '/'
                        }
     def put(self, name, value):
         self._cache[name] = value

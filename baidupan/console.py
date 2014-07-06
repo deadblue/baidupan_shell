@@ -9,6 +9,8 @@ from baidupan import command, context
 import readline
 
 def completer(prefix, index):
+    # TODO: 实现自动完成
+    # 需要每个命令上增加接口，暂不实现
     return None
 
 class Console():
