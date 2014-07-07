@@ -212,15 +212,42 @@ class BaiduPanClient():
 
     @rest_api('quota')
     def quota(self, checkexpire=1, checkfree=1):
+        '''
+        获取空间使用状况
+        '''
         pass
     @rest_api('list')
     def list(self, dir, num=100, page=1, order='time', desc=1, showempty=0):  # @ReservedAssignment
+        '''
+        文件列表
+        '''
         pass
     @rest_api('create', preset={'a':'commit', 'isdir':1, 'size':'', 'method':'post'}, post_field=['path', 'isdir', 'size', 'block_list', 'method'])
     def create_dir(self, path):
+        '''
+        创建目录
+        '''
+        pass
+    @rest_api('filemanager', preset={'opera':'copy'}, post_field=['filelist'])
+    def copy(self, filelist):
+        '''
+        复制文件，filelist格式：
+        [{"path":"文件路径","dest":"目标目录","newname":"新名称"}]
+        '''
+        pass
+    @rest_api('filemanager', preset={'opera':'move'}, post_field=['filelist'])
+    def move(self, filelist):
+        '''
+        移动文件，filelist格式：
+        [{"path":"文件路径","dest":"目标目录","newname":"新名称"}]
+        '''
         pass
     @rest_api('filemanager', preset={'opera':'delete'}, post_field=['filelist'])
-    def delete_files(self, filelist):
+    def delete(self, filelist):
+        '''
+        删除文件，filelist格式：
+        ["文件路径"]
+        '''
         pass
 
 client = BaiduPanClient()
