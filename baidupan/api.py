@@ -22,6 +22,7 @@ __all__ = ['BaiduPanClient', 'LoginException']
 
 _APP_ID = 250528
 _API_HOST = 'http://pan.baidu.com/api/'
+_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36'
 
 def rest_api(path, preset={}, post_field=[]):
     url = '%s%s' % (_API_HOST, path)
@@ -83,7 +84,7 @@ class BaiduPanClient():
         req = urllib2.Request(url)
         if post_data and len(post_data) > 0:
             req.add_data(urllib.urlencode(post_data))
-        req.add_header('User-Agent', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36')
+        req.add_header('User-Agent', _USER_AGENT)
         req.add_header('Referer', 'http://pan.baidu.com/disk/home')
         resp = self._url_opener.open(req)
         return resp
@@ -224,7 +225,7 @@ class BaiduPanClient():
         url = 'https://c.pcs.baidu.com/rest/2.0/pcs/file'
         query = {
              'method' : 'upload',
-             'app_id' : _API_HOST,
+             'app_id' : _APP_ID,
              'ondup' : 'newcopy',
              'dir' : savedir,
              'filename' : os.path.basename(localfile),
@@ -233,13 +234,43 @@ class BaiduPanClient():
         url = '%s?%s' % (url, urllib.urlencode(query))
         req = http.MultipartRequest(url)
         req.set_parts([
-                       http.FilePart(localfile)
+                       http.FilePart('file', localfile)
                        ])
+        req.add_header('User-Agent', _USER_AGENT)
         try:
             resp = urllib2.urlopen(req)
             return json.load(resp)
         except urllib2.HTTPError as he:
             return json.load(he)
+
+    def upload_curl(self, savedir, localfile):
+        '''
+        使用curl上传文件
+        @param savedir: 远端保存路径
+        @param localfile: 本地文件完整路径
+        '''
+        url = 'https://c.pcs.baidu.com/rest/2.0/pcs/file'
+        query = {
+             'method' : 'upload',
+             'app_id' : _APP_ID,
+             'ondup' : 'newcopy',
+             'dir' : savedir,
+             'filename' : os.path.basename(localfile),
+             'BDUSS' : self.xss_key
+             }
+        url = '%s?%s' % (url, urllib.urlencode(query))
+        
+        cmd = ['curl']
+        cmd.append('-A "%s"' % _USER_AGENT)
+        cmd.append('-H "Expect:"')
+        cmd.append('-F "file=@%s;type=application/octet-stream"' % localfile)
+        # 必须使用-o参数将执行结果转存，否则将无法看到上传进度
+        cmd.append('-o "/tmp/curl_out.txt"')
+        cmd.append('"%s"' % url)
+        cmd = ' '.join(cmd)
+        os.system(cmd)
+        # TODO: 执行结果的读取
+        print 'upload done!'
 
     @rest_api('quota')
     def quota(self, checkexpire=1, checkfree=1):
