@@ -5,7 +5,7 @@ Created on 2014/06/27
 @author: deadblue
 '''
 
-from baidupan import util, config
+from baidupan import config, http, util
 import base64
 import cookielib
 import inspect
@@ -95,7 +95,7 @@ class BaiduPanClient():
         # 需要先访问网盘首页，获得一个cookie
         self._execute_request('http://pan.baidu.com/')
         # 请求token
-        cbs = 'bd__cbs__%s' % util.random_str(6)
+        cbs = 'bd__cbs__%s' % util.random_hex_str(6)
         url = 'https://passport.baidu.com/v2/api/?getapi'
         data = [
                 ('tpl', 'netdisk'),
@@ -113,7 +113,7 @@ class BaiduPanClient():
         '''
         登陆检查，访问该页面主要是为了获取cookie
         '''
-        cbs = 'bd__cbs__%s' % util.random_str(6)
+        cbs = 'bd__cbs__%s' % util.random_hex_str(6)
         url = 'https://passport.baidu.com/v2/api/?logincheck'
         data = [
                 ('token', token),
@@ -129,7 +129,7 @@ class BaiduPanClient():
         '''
         获取加密密码用的rsa公钥
         '''
-        cbs = 'bd__cbs__%s' % util.random_str(6)
+        cbs = 'bd__cbs__%s' % util.random_hex_str(6)
         url = 'https://passport.baidu.com/v2/getpublickey'
         data = [
                 ('token', token),
@@ -161,7 +161,7 @@ class BaiduPanClient():
                 'mem_pass' : 'on',
                 'crypttype' : '12',
                 'ppui_logintime' : random.randint(5000, 10000),
-                'callback' : 'parent.bd__cbs__%s' % util.random_str(6),
+                'callback' : 'parent.bd__cbs__%s' % util.random_hex_str(6),
                 'username' : account,
                 'token' : token,
                 'rsakey' : key_info['key']
@@ -202,6 +202,11 @@ class BaiduPanClient():
             config.put(config.XSS_KEY, self.xss_key)
         config.save()
     def login(self, account, password):
+        '''
+        登录网盘
+        @param account: 账户
+        @param password: 密码
+        '''
         token = self._get_login_token()
         logging.debug('login token: %s' % token)
         self._login_check(token, account)
@@ -210,43 +215,78 @@ class BaiduPanClient():
         # 读取API必要的参数
         self._get_api_parameter()
 
+    def upload(self, savedir, localfile):
+        '''
+        上传文件
+        @param savedir: 远端保存路径
+        @param localfile: 本地文件完整路径
+        '''
+        url = 'https://c.pcs.baidu.com/rest/2.0/pcs/file'
+        query = {
+             'method' : 'upload',
+             'app_id' : _API_HOST,
+             'ondup' : 'newcopy',
+             'dir' : savedir,
+             'filename' : os.path.basename(localfile),
+             'BDUSS' : self.xss_key
+             }
+        url = '%s?%s' % (url, urllib.urlencode(query))
+        req = http.MultipartRequest(url)
+        req.set_parts([
+                       http.FilePart(localfile)
+                       ])
+        try:
+            resp = urllib2.urlopen(req)
+            return json.load(resp)
+        except urllib2.HTTPError as he:
+            return json.load(he)
+
     @rest_api('quota')
     def quota(self, checkexpire=1, checkfree=1):
         '''
         获取空间使用状况
+        @param checkexpire: 意义不明，使用默认值即可
+        @param checkfree: 意义不明，使用默认值即可
         '''
         pass
     @rest_api('list')
-    def list(self, dir, num=100, page=1, order='time', desc=1, showempty=0):  # @ReservedAssignment
+    def list(self, dir, num=100, page=1, order='time', desc=0, showempty=0):  # @ReservedAssignment
         '''
         文件列表
+        @param dir: 父目录
+        @param num: 每页显示条数
+        @param page: 页码
+        @param order: 排序方式(time/size/name)
+        @param desc: 传入则表示降序，不传值为升序
+        @param showempty: 不明，使用默认值
         '''
         pass
     @rest_api('create', preset={'a':'commit', 'isdir':1, 'size':'', 'method':'post'}, post_field=['path', 'isdir', 'size', 'block_list', 'method'])
     def create_dir(self, path):
         '''
         创建目录
+        @param path: 完整路径（不能一下创建多级目录）
         '''
         pass
     @rest_api('filemanager', preset={'opera':'copy'}, post_field=['filelist'])
     def copy(self, filelist):
         '''
-        复制文件，filelist格式：
-        [{"path":"文件路径","dest":"目标目录","newname":"新名称"}]
+        复制文件
+        @param filelist: 复制操作，格式为：[{"path":"文件路径","dest":"目标目录","newname":"新名称"}]
         '''
         pass
     @rest_api('filemanager', preset={'opera':'move'}, post_field=['filelist'])
     def move(self, filelist):
         '''
-        移动文件，filelist格式：
-        [{"path":"文件路径","dest":"目标目录","newname":"新名称"}]
+        移动文件
+        @param filelist: 移动操作，格式为：[{"path":"文件路径","dest":"目标目录","newname":"新名称"}]
         '''
         pass
     @rest_api('filemanager', preset={'opera':'delete'}, post_field=['filelist'])
     def delete(self, filelist):
         '''
-        删除文件，filelist格式：
-        ["文件路径"]
+        删除文件
+        @param filelist: 删除文件列表，格式为：["文件路径"]
         '''
         pass
 

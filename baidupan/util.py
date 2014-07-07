@@ -11,10 +11,12 @@ import time
 def timstamp():
     return int(time.time() * 1000)
 
-def random_str(length=6):
+def random_hex_str(length=6):
     source = '0123456789abcdef'
+    return random_str(source, length)
+
+def random_str(source, length):
     buf = []
     for _ in xrange(0, length):
         buf.append(random.choice(source))
     return ''.join(buf)
-    
