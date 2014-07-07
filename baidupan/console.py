@@ -20,7 +20,7 @@ class Console():
         readline.set_completer(completer)
     def run(self):
         while 1:
-            prompt = 'YunPan:%s> ' % context.get(context.PWD)
+            prompt = 'YunPan:%s> ' % context.get(context.CWD)
             line = raw_input(prompt)
             if line == 'exit':
                 break

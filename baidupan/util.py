@@ -17,3 +17,4 @@ def random_str(length=6):
     for _ in xrange(0, length):
         buf.append(random.choice(source))
     return ''.join(buf)
+    
