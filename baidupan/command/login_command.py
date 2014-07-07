@@ -6,7 +6,7 @@ Created on 2014/07/07
 '''
 
 from baidupan import api
-from baidupan.command import Command, InvalidArgumentException, manager
+from baidupan.command import Command, InvalidArgumentException
 
 class LoginCommand(Command):
     def __init__(self):
@@ -22,4 +22,3 @@ class LoginCommand(Command):
             raise InvalidArgumentException()
         return pair[0], pair[1]
 
-manager.register(LoginCommand())

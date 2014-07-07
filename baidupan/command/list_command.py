@@ -6,7 +6,7 @@ Created on 2014/07/07
 '''
 
 from baidupan import api, context
-from baidupan.command import Command, manager
+from baidupan.command import Command
 
 class ListCommand(Command):
     def __init__(self):
@@ -16,5 +16,3 @@ class ListCommand(Command):
         print '%-20s %-16s %s' % ('file_id', 'size', 'name')
         for fl in files['list']:
             print '%-20d %-16d %s' % (fl['fs_id'], fl['size'], fl['server_filename'])
-
-manager.register(ListCommand())

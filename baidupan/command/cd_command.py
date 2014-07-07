@@ -6,7 +6,7 @@ Created on 2014/07/07
 '''
 
 from baidupan import context
-from baidupan.command import Command, manager
+from baidupan.command import Command
 import os
 
 class ChangeDirectoryCommand(Command):
@@ -23,5 +23,3 @@ class ChangeDirectoryCommand(Command):
             if not cwd.endswith('/'):
                 cwd += '/'
         context.put(context.CWD, cwd)
-
-manager.register(ChangeDirectoryCommand())

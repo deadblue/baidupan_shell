@@ -5,7 +5,8 @@ Created on 2014/07/05
 @author: deadblue
 '''
 
-from baidupan import command, context
+from baidupan import context
+from baidupan.command import manager
 import readline
 
 def completer(prefix, index):
@@ -28,7 +29,7 @@ class Console():
                 pos = line.find(' ')
                 cmd = line if pos < 0 else line[0:pos]
                 arg = None if pos < 0 else line[pos+1:]
-                cmd = command.manager.get_command(cmd)
+                cmd = manager.get_command(cmd)
                 if cmd:
                     cmd.execute(arg)
                 else:
