@@ -5,7 +5,7 @@ Created on 2014/06/27
 @author: deadblue
 '''
 
-from baidupan import config, http, util
+from baidupan import http, util
 import base64
 import cookielib
 import inspect
@@ -15,10 +15,11 @@ import os
 import random
 import re
 import rsa
+import tempfile
 import urllib
 import urllib2
 
-__all__ = ['BaiduPanClient', 'LoginException']
+__all__ = ['client', 'LoginException']
 
 _APP_ID = 250528
 _API_HOST = 'http://pan.baidu.com/api/'
@@ -32,7 +33,7 @@ def rest_api(path, preset={}, post_field=[]):
             get_data = {
                     'app_id' : _APP_ID,
                     'channel' : 'chunlei',
-                    'bdstoken' : obj.api_token,
+                    'bdstoken' : obj.bdstoken,
                     'clienttype' : 0,
                     'web' : 1,
                     '_': util.timstamp()
@@ -57,6 +58,31 @@ def rest_api(path, preset={}, post_field=[]):
         return invoker
     return invoker_creator
 
+def _calc_download_sign(sign1, sign2):
+    '''
+    计算下载签名
+    '''
+    result = []
+    # 准备256字节缓冲区
+    sbox = []
+    for i in xrange(256):
+        sbox.append(i)
+    # 变换缓冲区数据顺序
+    idx = 0
+    for i in xrange(256):
+        tmp = ord( sign1[ i % len(sign1) ] )
+        idx = (idx + sbox[i] + tmp) % 256
+        (sbox[i], sbox[idx]) = (sbox[idx], sbox[i])
+    # 计算最终签名
+    n1 = n2 = 0
+    for i in xrange(len(sign2)):
+        n1 = (n1 + 1) % 256
+        n2 = (n2 + sbox[n1]) % 256
+        (sbox[n1], sbox[n2]) = (sbox[n2], sbox[n1])
+        tmp = sbox[ (sbox[n1] + sbox[n2]) % 256 ]
+        result.append( chr( ord(sign2[i]) ^ tmp ) )
+    return base64.b64encode(''.join(result))
+
 class LoginException(Exception):
     def __init__(self, errno):
         self.erron = errno
@@ -66,16 +92,45 @@ class LoginException(Exception):
 class BaiduPanClient():
     def __init__(self):
         # 从文件加载cookie
-        cookie_file = os.path.join(os.getenv('HOME'), '.baidu_lixian.cookie')
+        cookie_file = os.path.join(os.getenv('HOME'), '.baidupan.cookie')
         self._cookie_jar = cookielib.LWPCookieJar(cookie_file)
         if os.path.exists(cookie_file): self._cookie_jar.load()
         # 初始化urlopener
         cookie_handler = urllib2.HTTPCookieProcessor(self._cookie_jar)
         self._url_opener = urllib2.build_opener(cookie_handler)
-        # 加载配置文件
-        self.api_token = config.get('api_token')
-        self.xss_key = config.get('xss_key')
+        # 获取登陆信息
+        self.is_login = False
+        self.user_name = self.bdstoken = self.bduss = None
+        self.timpstamp = self.download_sign = None
+        self._get_login_info()
     
+    def _get_login_info(self):
+        '''
+        判断是否成功登陆，并获取登陆后的相关信息
+        '''
+        url = 'http://pan.baidu.com/disk/home'
+        resp = self._execute_request(url)
+        html = resp.read()
+        # 用户名
+        try:
+            # 搜索赋值到yunData上的数据
+            ms = re.findall(r'yunData\.([\w_]+)\s*=\s*[\'"](.*?)[\'"];', html)
+            if ms is None or len(ms) == 0:
+                raise LoginException(-1)
+            yun_data = dict(ms)
+            # 提取必要的信息
+            self.user_name = yun_data['MYNAME']
+            self.bdstoken = yun_data['MYBDSTOKEN']
+            self.bduss = yun_data['MYBDUSS']
+            self.timpstamp = yun_data['timestamp']
+            sign1 = yun_data['sign1']
+            sign3 = yun_data['sign3']
+            self.download_sign = _calc_download_sign(sign3, sign1)
+            # 若成功提取则标记为登陆成功
+            self.is_login = True
+        except:
+            self.is_login = False
+
     def _execute_request(self, url, get_data=None, post_data=None):
         if get_data:
             get_data = urllib.urlencode(get_data)
@@ -98,15 +153,15 @@ class BaiduPanClient():
         # 请求token
         cbs = 'bd__cbs__%s' % util.random_hex_str(6)
         url = 'https://passport.baidu.com/v2/api/?getapi'
-        data = [
-                ('tpl', 'netdisk'),
-                ('apiver', 'v3'),
-                ('tt', util.timstamp()),
-                ('class', 'login'),
-                ('logintype', 'basicLogin'),
-                ('callback', cbs)
-                ]
-        resp = self._execute_request(url, data)
+        query = [
+                 ('tpl', 'netdisk'),
+                 ('apiver', 'v3'),
+                 ('tt', util.timstamp()),
+                 ('class', 'login'),
+                 ('logintype', 'basicLogin'),
+                 ('callback', cbs)
+                 ]
+        resp = self._execute_request(url, query)
         result = (resp.read()[len(cbs)+1:-1]).replace('\'', '"')
         result = json.loads(result)
         return result['data']['token']
@@ -116,34 +171,34 @@ class BaiduPanClient():
         '''
         cbs = 'bd__cbs__%s' % util.random_hex_str(6)
         url = 'https://passport.baidu.com/v2/api/?logincheck'
-        data = [
-                ('token', token),
-                ('tpl', 'netdisk'),
-                ('apiver', 'v3'),
-                ('tt', util.timstamp()),
-                ('username', account),
-                ('isphone', 'false'),
-                ('callback', cbs)
-                ]
-        self._execute_request(url, data)
+        query = [
+                 ('token', token),
+                 ('tpl', 'netdisk'),
+                 ('apiver', 'v3'),
+                 ('tt', util.timstamp()),
+                 ('username', account),
+                 ('isphone', 'false'),
+                 ('callback', cbs)
+                 ]
+        self._execute_request(url, query)
     def _get_public_key(self, token):
         '''
         获取加密密码用的rsa公钥
         '''
         cbs = 'bd__cbs__%s' % util.random_hex_str(6)
         url = 'https://passport.baidu.com/v2/getpublickey'
-        data = [
-                ('token', token),
-                ('tpl', 'netdisk'),
-                ('apiver', 'v3'),
-                ('tt', util.timstamp()),
-                ('callback', cbs),
-                ]
-        resp = self._execute_request(url, data)
+        query = [
+                 ('token', token),
+                 ('tpl', 'netdisk'),
+                 ('apiver', 'v3'),
+                 ('tt', util.timstamp()),
+                 ('callback', cbs),
+                 ]
+        resp = self._execute_request(url, query)
         result = (resp.read()[len(cbs)+1:-1]).replace('\'', '"')
         return json.loads(result)
     def _do_login(self, account, password, token, key_info):
-        data = {
+        form = {
                 'staticpage' : 'http://pan.baidu.com/res/static/thirdparty/pass_v3_jump.html',
                 'charset' : 'utf-8',
                 'tpl' : 'netdisk',
@@ -170,10 +225,10 @@ class BaiduPanClient():
         # 使用rsa加密密码
         pubkey = key_info['pubkey'].replace('-----BEGIN PUBLIC KEY-----\r\n', '').replace('\r\n-----END PUBLIC KEY-----', '')
         pubkey = rsa.key.PublicKey.load_pkcs1_openssl_der(base64.decodestring(pubkey))
-        data['password'] = base64.b64encode(rsa.encrypt(password, pubkey))
+        form['password'] = base64.b64encode(rsa.encrypt(password, pubkey))
         # 发送登陆请求
         url = 'https://passport.baidu.com/v2/api/?login'
-        resp = self._execute_request(url, None, data)
+        resp = self._execute_request(url, None, form)
         # 解析登陆结果
         m = re.search('err_no=(\d+)&', resp.read())
         if m is not None:
@@ -184,24 +239,6 @@ class BaiduPanClient():
             raise LoginException(-1)
         logging.debug('login successed!')
         self._cookie_jar.save()
-    def _get_api_parameter(self):
-        '''
-        获取后续API调用需要的参数
-        '''
-        url = 'http://pan.baidu.com/disk/home'
-        resp = self._execute_request(url)
-        html = resp.read()
-        # 获取api token
-        m = re.search(r'yunData.MYBDSTOKEN = "(\w+)"', html)
-        if m is not None:
-            self.api_token = m.group(1)
-            config.put(config.API_TOKEN, self.api_token)
-        # 获取xss key，通过flash上传时需要传入
-        m = re.search(r'yunData.MYBDUSS = "([^"]+)"', html)
-        if m is not None:
-            self.xss_key = m.group(1)
-            config.put(config.XSS_KEY, self.xss_key)
-        config.save()
     def login(self, account, password):
         '''
         登录网盘
@@ -213,8 +250,8 @@ class BaiduPanClient():
         self._login_check(token, account)
         key_info = self._get_public_key(token)
         self._do_login(account, password, token, key_info)
-        # 读取API必要的参数
-        self._get_api_parameter()
+        # 获取登陆信息
+        self._get_login_info()
 
     def upload(self, savedir, localfile):
         '''
@@ -229,7 +266,7 @@ class BaiduPanClient():
              'ondup' : 'newcopy',
              'dir' : savedir,
              'filename' : os.path.basename(localfile),
-             'BDUSS' : self.xss_key
+             'BDUSS' : self.bduss
              }
         url = '%s?%s' % (url, urllib.urlencode(query))
         req = http.MultipartRequest(url)
@@ -242,10 +279,10 @@ class BaiduPanClient():
             return json.load(resp)
         except urllib2.HTTPError as he:
             return json.load(he)
-
     def upload_curl(self, savedir, localfile):
         '''
         使用curl上传文件
+        上传大文件时使用此接口，可显示上传进度
         @param savedir: 远端保存路径
         @param localfile: 本地文件完整路径
         '''
@@ -256,28 +293,37 @@ class BaiduPanClient():
              'ondup' : 'newcopy',
              'dir' : savedir,
              'filename' : os.path.basename(localfile),
-             'BDUSS' : self.xss_key
+             'BDUSS' : self.bduss
              }
         url = '%s?%s' % (url, urllib.urlencode(query))
-        
+        # 创建临时文件用来保存输出结果
+        _, tmp_file = tempfile.mkstemp()
+        # 调用curl上传文件
         cmd = ['curl']
         cmd.append('-A "%s"' % _USER_AGENT)
         cmd.append('-H "Expect:"')
         cmd.append('-F "file=@%s;type=application/octet-stream"' % localfile)
-        # 必须使用-o参数将执行结果转存，否则将无法看到上传进度
-        cmd.append('-o "/tmp/curl_out.txt"')
+        cmd.append('-o "%s"' % tmp_file)    # 必须使用-o将执行结果转存，否则无法看到上传进度
         cmd.append('"%s"' % url)
         cmd = ' '.join(cmd)
         os.system(cmd)
-        # TODO: 执行结果的读取
-        print 'upload done!'
+        # 读取输出结果
+        fp = open(tmp_file, 'r')
+        result = json.load(fp)
+        fp.close()
+        return result
+
+    def download(self, fid):
+        fids = fid if type(fid) is list else [fid]
+        result = self.download_link(self.download_sign, self.timpstamp, json.dumps(fids))
+        print result
 
     @rest_api('quota')
     def quota(self, checkexpire=1, checkfree=1):
         '''
         获取空间使用状况
-        @param checkexpire: 意义不明，使用默认值即可
-        @param checkfree: 意义不明，使用默认值即可
+        @param checkexpire: 意义不明，使用默认值
+        @param checkfree: 意义不明，使用默认值
         '''
         pass
     @rest_api('list')
@@ -288,7 +334,7 @@ class BaiduPanClient():
         @param num: 每页显示条数
         @param page: 页码
         @param order: 排序方式(time/size/name)
-        @param desc: 传入则表示降序，不传值为升序
+        @param desc: 传None则升序，其它情况皆为降序
         @param showempty: 不明，使用默认值
         '''
         pass
@@ -303,21 +349,30 @@ class BaiduPanClient():
     def copy(self, filelist):
         '''
         复制文件
-        @param filelist: 复制操作，格式为：[{"path":"文件路径","dest":"目标目录","newname":"新名称"}]
+        @param filelist: 复制操作，格式为：[{"path":"源文件路径","dest":"目标目录","newname":"新名称"},...]
         '''
         pass
     @rest_api('filemanager', preset={'opera':'move'}, post_field=['filelist'])
     def move(self, filelist):
         '''
         移动文件
-        @param filelist: 移动操作，格式为：[{"path":"文件路径","dest":"目标目录","newname":"新名称"}]
+        @param filelist: 移动操作，格式为：[{"path":"源文件路径","dest":"目标目录","newname":"新名称"},...]
         '''
         pass
     @rest_api('filemanager', preset={'opera':'delete'}, post_field=['filelist'])
     def delete(self, filelist):
         '''
         删除文件
-        @param filelist: 删除文件列表，格式为：["文件路径"]
+        @param filelist: 删除文件列表，格式为：["文件路径","文件路径",...]
+        '''
+        pass
+    @rest_api('download', preset={'type':'dlink'}, post_field=['sign', 'timestamp', 'fidlist', 'type'])
+    def download_link(self, sign, timestamp, fidlist):
+        '''
+        获取文件下载地址
+        @param sign: 下载签名（从网盘首页页面中获取并计算）
+        @param timestamp: 时间戳（从网盘首页页面中获取）
+        @param fidlist: 要下载的文件列表，格式：[文件ID,文件ID,...]
         '''
         pass
 

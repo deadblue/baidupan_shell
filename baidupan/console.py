@@ -5,7 +5,7 @@ Created on 2014/07/05
 @author: deadblue
 '''
 
-from baidupan import context
+from baidupan import context, api
 from baidupan.command import manager
 import readline
 
@@ -21,7 +21,7 @@ class Console():
         readline.set_completer(completer)
     def run(self):
         while 1:
-            prompt = 'YunPan:%s> ' % context.get(context.CWD)
+            prompt = 'YunPan:%s> ' % context.get_rwd()
             line = raw_input(prompt)
             if line == 'exit':
                 break
@@ -31,7 +31,9 @@ class Console():
                 arg = None if pos < 0 else line[pos+1:]
                 cmd = manager.get_command(cmd)
                 if cmd:
-                    cmd.execute(arg)
+                    if cmd.need_login and not api.client.is_login:
+                        print 'Please login first!'
+                    else:
+                        cmd.execute(arg)
                 else:
-                    print 'invalid command'
-        print 'baidupan_cli exit!'
+                    print 'Invalid command'

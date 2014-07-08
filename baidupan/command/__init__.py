@@ -9,7 +9,8 @@ class InvalidArgumentException(Exception):
     pass
 
 class Command():
-    def __init__(self, name):
+    def __init__(self, name, need_login):
         self.name = name
+        self.need_login = need_login
     def execute(self, arg=None):
         pass

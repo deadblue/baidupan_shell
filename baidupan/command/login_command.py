@@ -10,7 +10,7 @@ from baidupan.command import Command, InvalidArgumentException
 
 class LoginCommand(Command):
     def __init__(self):
-        Command.__init__(self, 'login')
+        Command.__init__(self, 'login', False)
     def execute(self, arg=None):
         account, password = self._parse_arg(arg)
         api.client.login(account, password)

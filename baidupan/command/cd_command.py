@@ -11,15 +11,15 @@ import os
 
 class ChangeDirectoryCommand(Command):
     def __init__(self):
-        Command.__init__(self, 'cd')
+        Command.__init__(self, 'cd', True)
     def execute(self, arg=None):
         if not arg: arg = '/'
-        cwd = context.get(context.CWD)
+        rwd = context.get_rwd()
         if arg.startswith('/'):
-            cwd = arg
+            rwd = arg
         else:
-            cwd = '%s%s' % (cwd, arg)
-            cwd = os.path.abspath(cwd)
-            if not cwd.endswith('/'):
-                cwd += '/'
-        context.put(context.CWD, cwd)
+            rwd = '%s%s' % (rwd, arg)
+            rwd = os.path.abspath(rwd)
+            if not rwd.endswith('/'):
+                rwd += '/'
+        context.set_rwd(rwd)

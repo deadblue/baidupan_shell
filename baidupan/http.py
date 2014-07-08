@@ -47,7 +47,6 @@ class MultipartRequest(urllib2.Request):
         urllib2.Request.__init__(self, url, headers=headers)
         self.boundary = '----%s' % util.random_str(string.ascii_letters, 16)
         self.headers['Content-Type'] = 'multipart/form-data; boundary=%s' % self.boundary
-
     def set_parts(self, parts):
         if len(parts) == 0: return
         buf = []

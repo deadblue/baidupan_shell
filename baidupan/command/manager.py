@@ -4,9 +4,11 @@ Created on 2014/07/07
 
 @author: deadblue
 '''
-from baidupan.command.list_command import ListCommand
-from baidupan.command.login_command import LoginCommand
 from baidupan.command.cd_command import ChangeDirectoryCommand
+from baidupan.command.lcd_command import LocalChangeDirectoryCommand
+from baidupan.command.login_command import LoginCommand
+from baidupan.command.ls_command import ListCommand
+from baidupan.command.upload_command import UploadCommand
 
 class _Manager():
     def __init__(self):
@@ -20,6 +22,8 @@ _instance = _Manager()
 _instance.register(LoginCommand())
 _instance.register(ListCommand())
 _instance.register(ChangeDirectoryCommand())
+_instance.register(LocalChangeDirectoryCommand())
+_instance.register(UploadCommand())
 
 def get_command(name):
     return _instance.get_command(name)
