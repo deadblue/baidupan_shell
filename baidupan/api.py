@@ -316,6 +316,11 @@ class BaiduPanClient():
     def download(self, fid):
         fids = fid if type(fid) is list else [fid]
         result = self.download_link(self.download_sign, self.timpstamp, json.dumps(fids))
+        if result.get('errno') == 112:
+            # 签名超时，刷新签名重新获取
+            self._get_login_info()
+            result = self.download_link(self.download_sign, self.timpstamp, json.dumps(fids))
+        
         print result
 
     @rest_api('quota')
