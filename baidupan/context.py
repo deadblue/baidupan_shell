@@ -6,6 +6,7 @@ Created on 2014/07/06
 '''
 
 import os
+from baidupan import api
 
 # 远端当前路径
 _RWD = 'rwd'
@@ -22,7 +23,10 @@ _dir_cache = {}
 # 文件缓存
 _file_cache = {}
 
+# 终端活动标记
 alive = True
+# 百度盘客户端实例
+client = api.BaiduPanClient()
 
 def put(name, value):
     _data[name] = value

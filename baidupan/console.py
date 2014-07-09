@@ -5,16 +5,23 @@ Created on 2014/07/05
 @author: deadblue
 '''
 
-from baidupan import context, api
+from baidupan import context
 from baidupan.command import manager
 import readline
 
 def completer(prefix, index):
     # 获取当前行
-    #line = readline.get_line_buffer()
-    # TODO: 实现自动完成
-    # 需要每个命令上增加接口，暂不实现
-    return None
+    line = readline.get_line_buffer()
+    cmd, args = manager.parse_input(line)
+    words = []
+    if cmd is None:
+        # 自动提示命令
+        words = manager.get_command_names()
+        words = filter(lambda x:x.startswith(prefix), words)
+    else:
+        # 自动提示参数
+        words = cmd.get_completer_words(args)
+    return words[index] if words and index < len(words) else None
 
 class Console():
     def __init__(self):
@@ -31,9 +38,9 @@ class Console():
             # 解析命令和参数
             cmd, args = manager.parse_input(line)
             if cmd is None:
-                print 'No such command, type help to get more info'
+                print 'No such command'
                 continue
-            if cmd.need_login and not api.client.is_login:
+            if cmd.need_login and not context.client.is_login:
                 print 'You MUST login before use %s' % cmd.name
                 continue
             # 执行命令

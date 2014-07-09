@@ -5,7 +5,7 @@ Created on 2014/07/07
 @author: deadblue
 '''
 
-from baidupan import api
+from baidupan import context
 from baidupan.command import Command, InvalidArgumentException
 
 class LoginCommand(Command):
@@ -13,7 +13,7 @@ class LoginCommand(Command):
         Command.__init__(self, 'login', False)
     def execute(self, arg=None):
         account, password = self._parse_arg(arg)
-        api.client.login(account, password)
+        context.client.login(account, password)
     def _parse_arg(self, arg):
         if arg is None:
             raise InvalidArgumentException()

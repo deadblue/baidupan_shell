@@ -380,5 +380,3 @@ class BaiduPanClient():
         @param fidlist: 要下载的文件列表，格式：[文件ID,文件ID,...]
         '''
         pass
-
-client = BaiduPanClient()
