@@ -6,6 +6,7 @@ Created on 2014/07/07
 '''
 
 from baidupan.command.cd_command import ChangeDirectoryCommand
+from baidupan.command.debug_command import DebugCommand
 from baidupan.command.download_command import DownloadCommand
 from baidupan.command.exit_command import ExitCommand
 from baidupan.command.lcd_command import LocalChangeDirectoryCommand
@@ -31,6 +32,7 @@ _instance.register(LocalChangeDirectoryCommand())
 _instance.register(UploadCommand())
 _instance.register(DownloadCommand())
 _instance.register(ExitCommand())
+_instance.register(DebugCommand())
 
 def get_command_names():
     return _instance.get_command_names()
