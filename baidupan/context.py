@@ -12,35 +12,43 @@ _RWD = 'rwd'
 # 本地当前路径
 _LWD = 'lwd'
 
-class _Context():
-    '''
-    运行时内容，不需要持久化
-    '''
-    def __init__(self):
-        self._data = {
-                       _RWD : '/',
-                       _LWD : os.getcwd()
-                       }
-    def put(self, name, value):
-        self._data[name] = value
-    def get(self, name):
-        return self._data.get(name)
+# 上下文数据
+_data = {
+         _RWD : '/',
+         _LWD : os.getcwd()
+         }
+# 目录缓存
+_dir_cache = {}
+# 文件缓存
+_file_cache = {}
 
-_instance = _Context()
+alive = True
 
-def get(name):
-    return _instance.get(name)
 def put(name, value):
-    _instance.put(name, value)
+    _data[name] = value
+def get(name):
+    return _data.get(name)
 
 def get_rwd():
-    return _instance.get(_RWD)
+    return get(_RWD)
 def set_rwd(value):
-    _instance.put(_RWD, value)
+    put(_RWD, value)
 
 def get_lwd():
-    return _instance.get(_LWD)
+    return get(_LWD)
 def set_lwd(value):
-    _instance.put(_LWD, value)
+    put(_LWD, value)
 
-is_login = False
+def get_dir_from_cache(parent_dir):
+    return _dir_cache.get(parent_dir)
+def add_dir_to_cache(parent_dir, dir_obj):
+    sub_dirs = _dir_cache.get(parent_dir)
+    if not sub_dirs:
+        sub_dirs = []
+        _dir_cache[parent_dir] = sub_dirs
+    sub_dirs.append(dir_obj)
+
+def get_file_from_cache(file_id):
+    return _file_cache.get(file_id)
+def add_file_to_cache(file_obj):
+    _file_cache[file_obj['fs_id']] = file_obj

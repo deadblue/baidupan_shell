@@ -4,7 +4,9 @@ Created on 2014/07/07
 
 @author: deadblue
 '''
+
 from baidupan.command.cd_command import ChangeDirectoryCommand
+from baidupan.command.download_command import DownloadCommand
 from baidupan.command.lcd_command import LocalChangeDirectoryCommand
 from baidupan.command.login_command import LoginCommand
 from baidupan.command.ls_command import ListCommand
@@ -15,6 +17,8 @@ class _Manager():
         self._commands = {}
     def register(self, cmd):
         self._commands[cmd.name] = cmd
+    def get_command_names(self):
+        return self._commands.keys()
     def get_command(self, name):
         return self._commands[name] if self._commands.has_key(name) else None
 
@@ -24,7 +28,14 @@ _instance.register(ListCommand())
 _instance.register(ChangeDirectoryCommand())
 _instance.register(LocalChangeDirectoryCommand())
 _instance.register(UploadCommand())
+_instance.register(DownloadCommand())
 
-def get_command(name):
-    return _instance.get_command(name)
+def get_command_names():
+    return _instance.get_command_names()
 
+def parse_input(line):
+    pos = line.find(' ')
+    cmd_name = line if pos < 0 else line[0:pos]
+    args = None if pos < 0 else line[pos+1:]
+    cmd = _instance.get_command(cmd_name)
+    return cmd, args
