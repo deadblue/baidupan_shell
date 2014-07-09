@@ -21,4 +21,3 @@ class LoginCommand(Command):
         if len(pair) < 2:
             raise InvalidArgumentException()
         return pair[0], pair[1]
-
