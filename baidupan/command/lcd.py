@@ -44,4 +44,5 @@ class LocalChangeDirectoryCommand(Command):
         # 列出父目录下所有目录
         sub_dirs = os.listdir(parent_dir)
         # 列出所有符合前缀的子目录
-        return filter(lambda x:x.startswith(sub_prefix), sub_dirs)
+        sub_dirs = filter(lambda x:x.startswith(sub_prefix), sub_dirs)
+        return map(lambda x:'%s/' % x, sub_dirs)

@@ -12,8 +12,7 @@ class DebugCommand(Command):
     def __init__(self):
         Command.__init__(self, 'debug', False)
     def execute(self, arg=None):
-        print '  login: %r' % context.client.is_login
+        print 'login: %r' % context.client.is_login
         if context.client.is_login:
-            print '    user name: %s' % context.client.user_name
-        print '  remote work directory: %s' % context.get_rwd()
-        print '  local work directory: %s' % context.get_lwd()
+            print 'user name: %s' % context.client.user_name
+        # TODO：输出缓存信息

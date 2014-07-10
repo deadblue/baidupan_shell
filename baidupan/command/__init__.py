@@ -8,6 +8,9 @@ Created on 2014/07/07
 class InvalidArgumentException(Exception):
     pass
 
+class CommandExecuteException(Exception):
+    pass
+
 class Command():
     def __init__(self, name, need_login):
         self.name = name

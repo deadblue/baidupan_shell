@@ -5,14 +5,15 @@ Created on 2014/07/07
 @author: deadblue
 '''
 
-from baidupan.command.cd_command import ChangeDirectoryCommand
-from baidupan.command.debug_command import DebugCommand
-from baidupan.command.download_command import DownloadCommand
-from baidupan.command.exit_command import ExitCommand
-from baidupan.command.lcd_command import LocalChangeDirectoryCommand
-from baidupan.command.login_command import LoginCommand
-from baidupan.command.ls_command import ListCommand
-from baidupan.command.upload_command import UploadCommand
+from baidupan.command.cd import ChangeDirectoryCommand
+from baidupan.command.debug import DebugCommand
+from baidupan.command.download import DownloadCommand
+from baidupan.command.exit import ExitCommand
+from baidupan.command.lcd import LocalChangeDirectoryCommand
+from baidupan.command.login import LoginCommand
+from baidupan.command.ls import ListCommand
+from baidupan.command.pwd import PrintWorkingDirectoryCommand
+from baidupan.command.upload import UploadCommand
 
 class _Manager():
     def __init__(self):
@@ -26,6 +27,7 @@ class _Manager():
 
 _instance = _Manager()
 _instance.register(LoginCommand())
+_instance.register(PrintWorkingDirectoryCommand())
 _instance.register(ListCommand())
 _instance.register(ChangeDirectoryCommand())
 _instance.register(LocalChangeDirectoryCommand())
