@@ -16,7 +16,7 @@ _LWD = 'lwd'
 # 上下文数据
 _data = {
          _RWD : '/',
-         _LWD : os.getcwd()
+         _LWD : '%s%s' % (os.getcwd(), os.sep)
          }
 # 目录缓存
 _dir_cache = {}
@@ -43,16 +43,16 @@ def get_lwd():
 def set_lwd(value):
     put(_LWD, value)
 
+def has_dir_cache(parent_dir):
+    return _dir_cache.has_key(parent_dir)
+def cache_file_list(parent_dir, files):
+    sub_dirs = []
+    for fl_obj in files:
+        _file_cache[ fl_obj['fs_id'] ] = fl_obj
+        if fl_obj['isdir'] == 1:
+            sub_dirs.append(fl_obj)
+    _dir_cache[parent_dir] = sub_dirs
 def get_dir_from_cache(parent_dir):
     return _dir_cache.get(parent_dir)
-def add_dir_to_cache(parent_dir, dir_obj):
-    sub_dirs = _dir_cache.get(parent_dir)
-    if not sub_dirs:
-        sub_dirs = []
-        _dir_cache[parent_dir] = sub_dirs
-    sub_dirs.append(dir_obj)
-
 def get_file_from_cache(file_id):
     return _file_cache.get(file_id)
-def add_file_to_cache(file_obj):
-    _file_cache[file_obj['fs_id']] = file_obj
