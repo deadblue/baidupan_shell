@@ -23,7 +23,7 @@ __all__ = ['client', 'LoginException']
 
 _APP_ID = 250528
 _API_HOST = 'http://pan.baidu.com/api/'
-_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36'
+_USER_AGENT = 'Mozilla/5.0 (Macintosh) AppleWebKit/537.36'
 
 def rest_api(path, preset={}, post_field=[]):
     url = '%s%s' % (_API_HOST, path)
@@ -94,7 +94,8 @@ class BaiduPanClient():
         # 从文件加载cookie
         cookie_file = os.path.join(os.getenv('HOME'), '.baidupan.cookie')
         self._cookie_jar = cookielib.LWPCookieJar(cookie_file)
-        if os.path.exists(cookie_file): self._cookie_jar.load()
+        if os.path.exists(cookie_file):
+            self._cookie_jar.load()
         # 初始化urlopener
         cookie_handler = urllib2.HTTPCookieProcessor(self._cookie_jar)
         self._url_opener = urllib2.build_opener(cookie_handler)
@@ -313,15 +314,30 @@ class BaiduPanClient():
         fp.close()
         return result
 
-    def download(self, fid):
+    def download(self, fid, save_path):
+        # 获取下载地址
         fids = fid if type(fid) is list else [fid]
         result = self.download_link(self.download_sign, self.timpstamp, json.dumps(fids))
         if result.get('errno') == 112:
             # 签名超时，刷新签名重新获取
             self._get_login_info()
             result = self.download_link(self.download_sign, self.timpstamp, json.dumps(fids))
-        
-        print result
+        down_url = result['dlink'][0]['dlink']
+        # 调用curl进行下载
+        cmd = ['curl']
+        cmd.append('-A "%s"' % _USER_AGENT)
+        cmd.append('-e "http://pan.baidu.com/disk/home"')
+        cookies = ['cflag=65535%3A1']
+        for cookie in self._cookie_jar:
+            if cookie.domain == '.baidu.com':
+                cookies.append('%s=%s' % (cookie.name, urllib.quote(cookie.value)))
+        cmd.append('--cookie "%s"' % '; '.join(cookies))
+        cmd.append('-o "%s"' % save_path)    # 必须使用-o将执行结果转存，否则无法看到上传进度
+        cmd.append('"%s"' % down_url)
+        cmd = ' '.join(cmd)
+        print cmd
+        os.system(cmd)
+        # TODO: 下载有问题，待检查
 
     @rest_api('quota')
     def quota(self, checkexpire=1, checkfree=1):
