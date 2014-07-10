@@ -9,7 +9,7 @@ baidu_lixian
 ## 环境要求
  * python 2.7
  * python-rsa: `pip install rsa`
- * curl: `brew install curl`
+ * curl: http://curl.haxx.se/download.html
 
 ## 使用方式
 ```
