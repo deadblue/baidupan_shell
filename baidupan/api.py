@@ -337,6 +337,30 @@ class BaiduPanClient():
         cmd.append('"%s"' % down_url)
         cmd = ' '.join(cmd)
         os.system(cmd)
+    
+    def play(self, fid):
+        fids = fid if type(fid) is list else [fid]
+        result = self.download_link(self.download_sign, self.timpstamp, json.dumps(fids))
+        if result.get('errno') == 112:
+            # 签名超时，刷新签名重新获取
+            self._get_login_info()
+            result = self.download_link(self.download_sign, self.timpstamp, json.dumps(fids))
+        down_url = result['dlink'][0]['dlink']
+        # 调用curl进行下载
+        cmd = ['curl']
+        cmd.append('-L')
+        cmd.append('-A "%s"' % _USER_AGENT)
+        cmd.append('-e "http://pan.baidu.com/disk/home"')
+        cookies = []
+        for cookie in self._cookie_jar:
+            if cookie.domain == '.baidu.com':
+                cookies.append('%s=%s' % (cookie.name, urllib.quote(cookie.value)))
+        cmd.append('-b "%s"' % '; '.join(cookies))
+        cmd.append('--url "%s"' % down_url)
+        cmd.append('-o - | mplayer -cache 8192 -')    # 调用mplayer播放
+        cmd = ' '.join(cmd)
+        print cmd
+        os.system(cmd)
 
     @rest_api('quota')
     def quota(self, checkexpire=1, checkfree=1):

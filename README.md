@@ -8,7 +8,7 @@ baidu_lixian
 
 ## 环境要求
  * python 2.7
- * python-rsa: `pip install python-rsa`
+ * python-rsa: `pip install rsa`
  * curl: `brew install curl`
 
 ## 使用方式
@@ -59,7 +59,13 @@ file-to-upload可以是绝对路径或相对路径。使用相对路径时，是
 目前参数为文件ID，考虑改为文件名称  
 依赖curl工具  
 **一次只能下载一个文件**  
-*TODO：实现功能、增加下载工具支持（wget/aria等），支持批量下载*  
+*TODO：增加下载工具支持（wget/aria等），支持批量下载*  
+
+#### play - 播放
+命令格式：play fileid-to-play  
+临时实现，有待优化，考虑支持多播放器  
+依赖curl和mplayer  
+*TODO：优化，多播放器支持*  
 
 #### exit - 退出
 命令格式：exit  

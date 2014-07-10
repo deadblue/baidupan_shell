@@ -10,6 +10,7 @@ encoding//baidupan/command/lcd.py=utf-8
 encoding//baidupan/command/login.py=utf-8
 encoding//baidupan/command/ls.py=utf-8
 encoding//baidupan/command/manager.py=utf-8
+encoding//baidupan/command/play.py=utf-8
 encoding//baidupan/command/pwd.py=utf-8
 encoding//baidupan/command/upload.py=utf-8
 encoding//baidupan/console.py=utf-8

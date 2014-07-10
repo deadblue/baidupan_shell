@@ -14,6 +14,7 @@ from baidupan.command.login import LoginCommand
 from baidupan.command.ls import ListCommand
 from baidupan.command.pwd import PrintWorkingDirectoryCommand
 from baidupan.command.upload import UploadCommand
+from baidupan.command.play import PlayCommand
 
 class _Manager():
     def __init__(self):
@@ -33,6 +34,7 @@ _instance.register(ChangeDirectoryCommand())
 _instance.register(LocalChangeDirectoryCommand())
 _instance.register(UploadCommand())
 _instance.register(DownloadCommand())
+_instance.register(PlayCommand())
 _instance.register(ExitCommand())
 _instance.register(DebugCommand())
 
