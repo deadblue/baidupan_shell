@@ -49,14 +49,15 @@ remote-dir可是输入相对路径或绝对路径
 #### upload - 上传
 命令格式：upload file-to-upload  
 file-to-upload可以是绝对路径或相对路径。使用相对路径时，是相对于本地工作目录  
+文件将上传到远程工作目录下  
 依赖curl工具  
 **一次只能上传一个文件**  
 *TODO：实现自动完成提示，支持批量上传*  
 
 #### download - 下载
 命令格式：upload fileid-to-download  
-目前需要传入文件ID，因为文件名格式千奇百怪  
 暂时不可用，因为传cookie有问题  
+目前参数为文件ID，考虑改为文件名称  
 依赖curl工具  
 **一次只能下载一个文件**  
 *TODO：实现功能、增加下载工具支持（wget/aria等），支持批量下载*  
@@ -70,5 +71,5 @@ file-to-upload可以是绝对路径或相对路径。使用相对路径时，是
 输出调试信息，随着开发的推进，输出的信息也会不一样  
 
 ## 待添加的指令
-logout（注销）、cp（复制文件）、mv（移动文件）、rename（重命名）、rm（删除）  
-tasklist（离线任务列表）、taskadd（添加离线任务）、...
+logout（注销）、cp（复制文件）、mv（移动文件）、rename（重命名）、rm（删除）、  
+mkdir（创建目录）、tasklist（离线任务列表）、taskadd（添加离线任务）
