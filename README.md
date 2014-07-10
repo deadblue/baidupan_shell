@@ -55,9 +55,9 @@ file-to-upload可以是绝对路径或相对路径。使用相对路径时，是
 *TODO：实现自动完成提示，支持批量上传*  
 
 #### download - 下载
-命令格式：upload fileid-to-download  
-暂时不可用，因为传cookie有问题  
+命令格式：download fileid-to-download  
 目前参数为文件ID，考虑改为文件名称  
+暂时不可用，因为传cookie有问题  
 依赖curl工具  
 **一次只能下载一个文件**  
 *TODO：实现功能、增加下载工具支持（wget/aria等），支持批量下载*  
