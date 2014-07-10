@@ -325,19 +325,18 @@ class BaiduPanClient():
         down_url = result['dlink'][0]['dlink']
         # 调用curl进行下载
         cmd = ['curl']
+        cmd.append('-L')
         cmd.append('-A "%s"' % _USER_AGENT)
         cmd.append('-e "http://pan.baidu.com/disk/home"')
-        cookies = ['cflag=65535%3A1']
+        cookies = []
         for cookie in self._cookie_jar:
             if cookie.domain == '.baidu.com':
                 cookies.append('%s=%s' % (cookie.name, urllib.quote(cookie.value)))
-        cmd.append('--cookie "%s"' % '; '.join(cookies))
+        cmd.append('-b "%s"' % '; '.join(cookies))
         cmd.append('-o "%s"' % save_path)    # 必须使用-o将执行结果转存，否则无法看到上传进度
         cmd.append('"%s"' % down_url)
         cmd = ' '.join(cmd)
-        print cmd
         os.system(cmd)
-        # TODO: 下载有问题，待检查
 
     @rest_api('quota')
     def quota(self, checkexpire=1, checkfree=1):
