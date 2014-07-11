@@ -90,13 +90,9 @@ class LoginException(Exception):
         return 'login error: %d' % self.erron
 
 class BaiduPanClient():
-    def __init__(self):
-        # 从文件加载cookie
-        cookie_file = os.path.join(os.getenv('HOME'), '.baidupan.cookie')
-        self._cookie_jar = cookielib.LWPCookieJar(cookie_file)
-        if os.path.exists(cookie_file):
-            self._cookie_jar.load()
+    def __init__(self, cookie_jar=None):
         # 初始化urlopener
+        self._cookie_jar = cookie_jar or cookielib.CookieJar()
         cookie_handler = urllib2.HTTPCookieProcessor(self._cookie_jar)
         self._url_opener = urllib2.build_opener(cookie_handler)
         # 获取登陆信息
@@ -239,7 +235,6 @@ class BaiduPanClient():
         else:
             raise LoginException(-1)
         logging.debug('login successed!')
-        self._cookie_jar.save()
     def login(self, account, password):
         '''
         登录网盘
@@ -313,6 +308,22 @@ class BaiduPanClient():
         result = json.load(fp)
         fp.close()
         return result
+    
+    def get_download_request(self, file_id):
+        fids = file_id if type(file_id) is list else [file_id]
+        result = self.download_link(self.download_sign, self.timpstamp, json.dumps(fids))
+        if result.get('errno') == 112:
+            # 签名超时，刷新签名重新获取
+            self._get_login_info()
+            result = self.download_link(self.download_sign, self.timpstamp, json.dumps(fids))
+        # 获取下载地址
+        reqs = []
+        for dl in result['dlink']:
+            req = urllib2.Request(dl['dlink'])
+            req.add_header('User-Agent', _USER_AGENT)
+            self._cookie_jar.add_cookie_header(req)
+            reqs.append(req)
+        return reqs[0] if len(reqs) == 1 else reqs
 
     def download(self, fid, save_path):
         # 获取下载地址
@@ -335,7 +346,7 @@ class BaiduPanClient():
         cmd.append('-b "%s"' % '; '.join(cookies))
         cmd.append('-o "%s"' % save_path)    # 必须使用-o将执行结果转存，否则无法看到上传进度
         cmd.append('"%s"' % down_url)
-        cmd = ' '.join(cmd)
+        cmd = ' '.join(cmd).encode('utf-8')
         os.system(cmd)
     
     def play(self, fid):
@@ -358,8 +369,7 @@ class BaiduPanClient():
         cmd.append('-b "%s"' % '; '.join(cookies))
         cmd.append('--url "%s"' % down_url)
         cmd.append('-o - | mplayer -cache 8192 -')    # 调用mplayer播放
-        cmd = ' '.join(cmd)
-        print cmd
+        cmd = ' '.join(cmd).encode('utf-8')
         os.system(cmd)
 
     @rest_api('quota')

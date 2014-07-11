@@ -5,8 +5,9 @@ Created on 2014/07/06
 @author: deadblue
 '''
 
-import os
 from baidupan import api
+import cookielib
+import os
 
 # 远端当前路径
 _RWD = 'rwd'
@@ -25,8 +26,13 @@ _file_cache = {}
 
 # 终端活动标记
 alive = True
-# 百度盘客户端实例
-client = api.BaiduPanClient()
+# cookie
+cookie_file = os.path.join(os.getenv('HOME'), '.baidupan.cookie')
+cookie_jar = cookielib.MozillaCookieJar(cookie_file)
+if os.path.exists(cookie_file):
+    cookie_jar.load()
+# API客户端实例
+client = api.BaiduPanClient(cookie_jar)
 
 def put(name, value):
     _data[name] = value

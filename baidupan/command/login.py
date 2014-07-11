@@ -14,6 +14,7 @@ class LoginCommand(Command):
     def execute(self, arg=None):
         account, password = self._parse_arg(arg)
         context.client.login(account, password)
+        context.cookie_jar.save()
     def _parse_arg(self, arg):
         if arg is None:
             raise InvalidArgumentException()

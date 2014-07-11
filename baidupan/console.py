@@ -48,3 +48,5 @@ class Console():
                 cmd.execute(args)
             except:
                 print 'execute %s error!' % cmd.name
+        # 流程结束时保存cookie
+        context.cookie_jar.save()
