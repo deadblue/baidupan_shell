@@ -227,7 +227,8 @@ class BaiduPanClient():
         url = 'https://passport.baidu.com/v2/api/?login'
         resp = self._execute_request(url, None, form)
         # 解析登陆结果
-        m = re.search('err_no=(\d+)&', resp.read())
+        body = resp.read()
+        m = re.search('err_no=(\d+)&', body)
         if m is not None:
             err_no = int(m.group(1))
             if err_no > 0: raise LoginException(err_no)
