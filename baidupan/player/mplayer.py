@@ -15,6 +15,13 @@ def play(video_req, zoom=None):
     @param zoom: 缩放设置
     '''
     cmd = ['mplayer']
+    # 减少输出
+    cmd.append('-quiet')    # -really-quiet
+    # 播放界面
+    cmd.append('-osdlevel')
+    cmd.append('1')
+    # 优先使用IPv4
+    cmd.append('-prefer-ipv4')
     # 缓冲区大小
     cmd.append('-cache')
     cmd.append('8192')
