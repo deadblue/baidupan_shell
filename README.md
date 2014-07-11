@@ -8,17 +8,16 @@ baidu_lixian
 
 ## 环境要求
  * Required:
-  * python 2.7: https://www.python.org/download/
-  * python-rsa: http://stuvel.eu/rsa
+  * python 2.7.x: https://www.python.org/download/
   * curl: http://curl.haxx.se/download.html
  * Optional:
+  * mplayer: http://www.mplayerhq.hu/design7/dload.html
   * wget: https://www.gnu.org/software/wget/
   * aria2c: http://aria2.sourceforge.net/
-  * mplayer: http://www.mplayerhq.hu/design7/dload.html
 
 ## 使用方式
 ```
-./baidupan_cli.py
+python baidupan_cli.py
 YunPan:/>login your-account your-password
 YunPan:/>ls
 ...
@@ -61,16 +60,14 @@ file-to-upload可以是绝对路径或相对路径。使用相对路径时，是
 
 #### download - 下载
 命令格式：download fileid-to-download  
-目前参数为文件ID，考虑改为文件名称  
-依赖curl工具  
+默认使用curl下载，支持wget（有问题）和aria2c  
 **一次只能下载一个文件**  
-*TODO：增加下载工具支持（wget/aria等），支持批量下载*  
+*TODO：修复wget问题；允许配置下载工具；支持批量下载*  
 
 #### play - 播放
 命令格式：play fileid-to-play  
-临时实现，有待优化，考虑支持多播放器  
-依赖curl和mplayer  
-*TODO：优化，多播放器支持*  
+调用mplayer进行播放  
+暂时其它需要支持的播放器  
 
 #### exit - 退出
 命令格式：exit  
@@ -81,5 +78,5 @@ file-to-upload可以是绝对路径或相对路径。使用相对路径时，是
 输出调试信息，随着开发的推进，输出的信息也会不一样  
 
 ## 待添加的指令
-logout（注销）、cp（复制文件）、mv（移动文件）、rename（重命名）、rm（删除）、  
-mkdir（创建目录）、tasklist（离线任务列表）、taskadd（添加离线任务）
+config（配置）、logout（注销）、cp（复制文件）、mv（移动文件）、rename（重命名）、  
+rm（删除）、mkdir（创建目录）、tasklist（离线任务列表）、taskadd（添加离线任务）
