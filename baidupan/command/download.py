@@ -6,6 +6,7 @@ Created on 2014/07/08
 '''
 
 from baidupan import context
+from baidupan.downloader import curl
 from baidupan.command import Command, InvalidArgumentException, \
     CommandExecuteException
 import os
@@ -26,4 +27,5 @@ class DownloadCommand(Command):
             raise NoSuchRemoteFileException()
         # 获取保存路径
         save_path = os.path.join(context.get_lwd(), file_obj['server_filename'])
-        context.client.download(file_id, save_path)
+        file_req = context.client.get_download_request(file_id)
+        curl.download(file_req, save_path)

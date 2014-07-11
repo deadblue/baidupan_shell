@@ -7,9 +7,14 @@ baidu_lixian
 ~~所以离线的功能就先这么坑着了~~  
 
 ## 环境要求
- * python 2.7
- * python-rsa: `pip install rsa`
- * curl: http://curl.haxx.se/download.html
+ * Required:
+  * python 2.7: https://www.python.org/download/
+  * python-rsa: http://stuvel.eu/rsa
+  * curl: http://curl.haxx.se/download.html
+ * Optional:
+  * wget: https://www.gnu.org/software/wget/
+  * aria2c: http://aria2.sourceforge.net/
+  * mplayer: http://www.mplayerhq.hu/design7/dload.html
 
 ## 使用方式
 ```

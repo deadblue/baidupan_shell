@@ -310,6 +310,10 @@ class BaiduPanClient():
         return result
     
     def get_download_request(self, file_id):
+        '''
+        获取下载文件的请求
+        请求中封装了完整地址、必要的请求头和cookie信息
+        '''
         fids = file_id if type(file_id) is list else [file_id]
         result = self.download_link(self.download_sign, self.timpstamp, json.dumps(fids))
         if result.get('errno') == 112:
@@ -321,56 +325,10 @@ class BaiduPanClient():
         for dl in result['dlink']:
             req = urllib2.Request(dl['dlink'])
             req.add_header('User-Agent', _USER_AGENT)
+            req.add_header('Referer', 'http://pan.baidu.com/disk/home')
             self._cookie_jar.add_cookie_header(req)
             reqs.append(req)
         return reqs[0] if len(reqs) == 1 else reqs
-
-    def download(self, fid, save_path):
-        # 获取下载地址
-        fids = fid if type(fid) is list else [fid]
-        result = self.download_link(self.download_sign, self.timpstamp, json.dumps(fids))
-        if result.get('errno') == 112:
-            # 签名超时，刷新签名重新获取
-            self._get_login_info()
-            result = self.download_link(self.download_sign, self.timpstamp, json.dumps(fids))
-        down_url = result['dlink'][0]['dlink']
-        # 调用curl进行下载
-        cmd = ['curl']
-        cmd.append('-L')
-        cmd.append('-A "%s"' % _USER_AGENT)
-        cmd.append('-e "http://pan.baidu.com/disk/home"')
-        cookies = []
-        for cookie in self._cookie_jar:
-            if cookie.domain == '.baidu.com':
-                cookies.append('%s=%s' % (cookie.name, urllib.quote(cookie.value)))
-        cmd.append('-b "%s"' % '; '.join(cookies))
-        cmd.append('-o "%s"' % save_path)    # 必须使用-o将执行结果转存，否则无法看到上传进度
-        cmd.append('"%s"' % down_url)
-        cmd = ' '.join(cmd).encode('utf-8')
-        os.system(cmd)
-    
-    def play(self, fid):
-        fids = fid if type(fid) is list else [fid]
-        result = self.download_link(self.download_sign, self.timpstamp, json.dumps(fids))
-        if result.get('errno') == 112:
-            # 签名超时，刷新签名重新获取
-            self._get_login_info()
-            result = self.download_link(self.download_sign, self.timpstamp, json.dumps(fids))
-        down_url = result['dlink'][0]['dlink']
-        # 调用curl进行下载
-        cmd = ['curl']
-        cmd.append('-L')
-        cmd.append('-A "%s"' % _USER_AGENT)
-        cmd.append('-e "http://pan.baidu.com/disk/home"')
-        cookies = []
-        for cookie in self._cookie_jar:
-            if cookie.domain == '.baidu.com':
-                cookies.append('%s=%s' % (cookie.name, urllib.quote(cookie.value)))
-        cmd.append('-b "%s"' % '; '.join(cookies))
-        cmd.append('--url "%s"' % down_url)
-        cmd.append('-o - | mplayer -cache 8192 -')    # 调用mplayer播放
-        cmd = ' '.join(cmd).encode('utf-8')
-        os.system(cmd)
 
     @rest_api('quota')
     def quota(self, checkexpire=1, checkfree=1):
