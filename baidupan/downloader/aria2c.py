@@ -9,7 +9,7 @@ import subprocess
 import os
 
 def download(download_req, save_path):
-    cmd = ['aria2c']
+    cmd = ['aria2c', '--file-allocation=none']
     # request header
     for hdr in download_req.header_items():
         cmd.append('--header')
