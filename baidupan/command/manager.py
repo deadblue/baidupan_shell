@@ -15,6 +15,7 @@ from baidupan.command.login import LoginCommand
 from baidupan.command.ls import ListCommand
 from baidupan.command.play import PlayCommand
 from baidupan.command.pwd import PrintWorkingDirectoryCommand
+from baidupan.command.taskadd import CloudTaskAddCommand
 from baidupan.command.upload import UploadCommand
 
 class _Manager():
@@ -39,6 +40,7 @@ _instance.register(DownloadCommand())
 _instance.register(PlayCommand())
 _instance.register(ExitCommand())
 _instance.register(DebugCommand())
+_instance.register(CloudTaskAddCommand())
 
 def get_command_names():
     return _instance.get_command_names()
