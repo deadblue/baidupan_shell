@@ -5,8 +5,7 @@ Created on 2014/07/08
 @author: deadblue
 '''
 
-from baidupan import context
-from baidupan.downloader import curl
+from baidupan import context, config
 from baidupan.command import Command, InvalidArgumentException, \
     CommandExecuteException
 import os
@@ -27,5 +26,16 @@ class DownloadCommand(Command):
             raise NoSuchRemoteFileException()
         # 获取保存路径
         save_path = os.path.join(context.get_lwd(), file_obj['server_filename'])
-        file_req = context.client.get_download_request(file_id)
-        curl.download(file_req, save_path)
+        download_req = context.client.get_download_request(file_id)
+        # 调用用户配置的下载器进行下载
+        dler = config.get_downloader()
+        if dler in ['aria', 'aria2c']:
+            from baidupan.downloader import aria2c
+            aria2c.download(download_req, save_path)
+        elif dler == 'wget':
+            from baidupan.downloader import wget
+            wget.download(download_req, save_path)
+        else:
+            # 默认情况下使用curl
+            from baidupan.downloader import curl
+            curl.download(download_req, save_path)
