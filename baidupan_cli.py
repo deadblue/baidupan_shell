@@ -6,7 +6,7 @@ Created on 2014/07/05
 @author: deadblue
 '''
 
-from baidupan import config, console
+from baidupan import config, context, console
 import atexit
 
 def on_exit():
@@ -15,4 +15,5 @@ def on_exit():
 if __name__ == '__main__':
     atexit.register(on_exit)
     config.load()
+    context.init()
     console.run()
