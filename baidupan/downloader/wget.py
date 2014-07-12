@@ -7,24 +7,16 @@ Created on 2014/07/11
 '''
 
 import subprocess
-from baidupan import context
 
-def download(file_req, save_path):
+def download(download_req, save_path):
     cmd = ['wget']
-    # user-agent
-    ua = file_req.get_header('User-Agent')
-    if ua: cmd.append('--user-agent="%s"' % ua)
-    # referer
-    ref = file_req.get_header('Referer')
-    if ref: cmd.append('--referer="%s"' % ref)
-    # cookie
-    cmd.append('--load-cookies')
-    cmd.append(context.cookie_file)
+    for hdr in download_req.header_items():
+        cmd.append('--header')
+        cmd.append('%s: %s' % hdr)
     # download url
-    cmd.append(file_req.get_full_url())
+    cmd.append(download_req.get_full_url())
     # save_path
     cmd.append('-O')
     cmd.append(save_path)
-    print cmd
     # execute it
     subprocess.call(cmd)

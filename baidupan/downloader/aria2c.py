@@ -5,21 +5,15 @@ Created on 2014/07/11
 @author: deadblue
 '''
 
-from baidupan import context
 import subprocess
 import os
 
-def download(file_req, save_path):
+def download(download_req, save_path):
     cmd = ['aria2c']
-    # user-agent
-    ua = file_req.get_header('User-Agent')
-    if ua: cmd.append('--user-agent=%s' % ua)
-    # referer
-    ref = file_req.get_header('Referer')
-    if ref: cmd.append('--referer=%s"' % ref)
-    # cookie
-    cmd.append('--load-cookies')
-    cmd.append(context.cookie_file)
+    # request header
+    for hdr in download_req.header_items():
+        cmd.append('--header')
+        cmd.append('%s: %s' % hdr)
     # save path
     save_dir, save_name = os.path.split(save_path)
     cmd.append('--dir')
@@ -27,6 +21,6 @@ def download(file_req, save_path):
     cmd.append('--out')
     cmd.append(save_name)
     # download url
-    cmd.append(file_req.get_full_url())
+    cmd.append(download_req.get_full_url())
     # run it
     subprocess.call(cmd)
