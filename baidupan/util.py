@@ -7,7 +7,12 @@ Created on 2014/07/05
 
 import random
 import time
+import os
 
+def get_data_file(data_name):
+    data_path = os.getenv('HOME') or os.getenv('USERPROFILE')
+    return os.path.join(data_path, data_name)
+    
 def timstamp():
     return int(time.time() * 1000)
 
