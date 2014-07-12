@@ -23,7 +23,7 @@ __all__ = ['client', 'LoginException']
 
 _APP_ID = 250528
 _API_HOST = 'http://pan.baidu.com/api/'
-_USER_AGENT = 'Mozilla/5.0 (Macintosh) AppleWebKit/537.36'
+_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:30.0) Gecko/20100101 Firefox/30.0'
 
 def rest_api(path, preset={}, post_field=[]):
     url = '%s%s' % (_API_HOST, path)
@@ -327,6 +327,11 @@ class BaiduPanClient():
             req = urllib2.Request(dl['dlink'])
             req.add_header('User-Agent', _USER_AGENT)
             req.add_header('Referer', 'http://pan.baidu.com/disk/home')
+            req.add_header('Pragma', 'no-cache')
+            req.add_header('Cache-Control', 'no-cache')
+            req.add_header('Accept-Encoding', 'gzip,deflate,sdch')
+            req.add_header('Accept', '*/*;q=0.8')
+            req.add_header('Connection', 'keep-alive')
             self._cookie_jar.add_cookie_header(req)
             reqs.append(req)
         return reqs[0] if len(reqs) == 1 else reqs
