@@ -38,7 +38,7 @@ def play(video_req, zoom=None):
             cmd.append('-y')
             cmd.append(str(zoom[1]))
     # user-agent
-    ua = video_req.get_header('User-Agent')
+    ua = video_req.get_header('User-agent') # 取出header时只有首字母大写
     if ua:
         cmd.append('-user-agent')
         cmd.append(ua)
