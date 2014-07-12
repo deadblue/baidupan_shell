@@ -24,9 +24,14 @@ class DownloadCommand(Command):
         file_obj = context.get_file_from_cache(file_id)
         if file_obj is None:
             raise NoSuchRemoteFileException()
+        if file_obj['isdir'] == 0:
+            self._download_file(file_obj)
+        else:
+            self._download_dir(file_obj)
+    def _download_file(self, file_obj):
         # 获取保存路径
         save_path = os.path.join(context.get_lwd(), file_obj['server_filename'])
-        download_req = context.client.get_download_request(file_id)
+        download_req = context.client.get_download_request(file_obj['fs_id'])
         # 调用用户配置的下载器进行下载
         dler = config.get_downloader()
         if dler in ['aria', 'aria2c']:
@@ -39,3 +44,5 @@ class DownloadCommand(Command):
             # 默认情况下使用curl
             from baidupan.downloader import curl
             curl.download(download_req, save_path)
+    def _download_dir(self, dir_obj):
+        raise Exception('暂未实现目录下载！')
