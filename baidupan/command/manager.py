@@ -6,15 +6,16 @@ Created on 2014/07/07
 '''
 
 from baidupan.command.cd import ChangeDirectoryCommand
+from baidupan.command.conf import ConfigCommand
 from baidupan.command.debug import DebugCommand
 from baidupan.command.download import DownloadCommand
 from baidupan.command.exit import ExitCommand
 from baidupan.command.lcd import LocalChangeDirectoryCommand
 from baidupan.command.login import LoginCommand
 from baidupan.command.ls import ListCommand
+from baidupan.command.play import PlayCommand
 from baidupan.command.pwd import PrintWorkingDirectoryCommand
 from baidupan.command.upload import UploadCommand
-from baidupan.command.play import PlayCommand
 
 class _Manager():
     def __init__(self):
@@ -27,6 +28,7 @@ class _Manager():
         return self._commands[name] if self._commands.has_key(name) else None
 
 _instance = _Manager()
+_instance.register(ConfigCommand())
 _instance.register(LoginCommand())
 _instance.register(PrintWorkingDirectoryCommand())
 _instance.register(ListCommand())
