@@ -6,12 +6,13 @@ Created on 2014/07/05
 @author: deadblue
 '''
 
-from baidupan.console import Console
+from baidupan import config, console
 import atexit
 
 def on_exit():
-    pass
+    config.save()
 
 if __name__ == '__main__':
     atexit.register(on_exit)
-    Console().run()
+    config.load()
+    console.run()

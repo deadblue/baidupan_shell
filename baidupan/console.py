@@ -9,7 +9,9 @@ from baidupan import context
 from baidupan.command import manager
 import readline
 
-def completer(prefix, index):
+__all__ = ['run']
+
+def _completer(prefix, index):
     # 获取当前行
     line = readline.get_line_buffer()
     cmd, args = manager.parse_input(line)
@@ -23,11 +25,11 @@ def completer(prefix, index):
         words = cmd.get_completer_words(args)
     return words[index] if words and index < len(words) else None
 
-class Console():
+class _Console():
     def __init__(self):
         # 绑定readline
         readline.parse_and_bind('tab: complete')
-        readline.set_completer(completer)
+        readline.set_completer(_completer)
     def run(self):
         while context.alive:
             prompt = 'YunPan:%s> ' % context.get_rwd()
@@ -50,3 +52,6 @@ class Console():
                 print 'execute %s error!' % cmd.name
         # 流程结束时保存cookie
         context.cookie_jar.save()
+
+def run():
+    _Console().run()
