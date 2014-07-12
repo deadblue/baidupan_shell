@@ -22,11 +22,11 @@ import urllib2
 __all__ = ['client', 'LoginException']
 
 _APP_ID = 250528
-_API_HOST = 'http://pan.baidu.com/api/'
+_NORMAL_API_HOST = 'http://pan.baidu.com/api/'
+_REST_API_HOST = 'http://pan.baidu.com/rest/2.0/'
 _USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:30.0) Gecko/20100101 Firefox/30.0'
 
-def rest_api(path, preset={}, post_field=[]):
-    url = '%s%s' % (_API_HOST, path)
+def raw_api(url, preset={}, post_field=[]):
     def invoker_creator(func):
         def invoker(obj, *args, **kwargs):
             # 必要参数
@@ -36,7 +36,8 @@ def rest_api(path, preset={}, post_field=[]):
                     'bdstoken' : obj.bdstoken,
                     'clienttype' : 0,
                     'web' : 1,
-                    '_': util.timstamp()
+                    '_': util.timstamp(),
+                    't': util.timstamp()
                     }
             # 处理API预设参数
             if preset: get_data.update(preset)
@@ -57,6 +58,12 @@ def rest_api(path, preset={}, post_field=[]):
             return result
         return invoker
     return invoker_creator
+def normal_api(path, preset={}, post_field=[]):
+    url = '%s%s' % (_NORMAL_API_HOST, path)
+    return raw_api(url, preset, post_field)
+def rest_api(path, preset={}, post_field=[]):
+    url = '%s%s' % (_REST_API_HOST, path)
+    return raw_api(url, preset, post_field)
 
 def _calc_download_sign(sign1, sign2):
     '''
@@ -309,7 +316,7 @@ class BaiduPanClient():
         result = json.load(fp)
         fp.close()
         return result
-    
+
     def get_download_request(self, file_id):
         '''
         获取下载文件的请求
@@ -336,7 +343,7 @@ class BaiduPanClient():
             reqs.append(req)
         return reqs[0] if len(reqs) == 1 else reqs
 
-    @rest_api('quota')
+    @normal_api('quota')
     def quota(self, checkexpire=1, checkfree=1):
         '''
         获取空间使用状况
@@ -344,7 +351,7 @@ class BaiduPanClient():
         @param checkfree: 意义不明，使用默认值
         '''
         pass
-    @rest_api('list')
+    @normal_api('list')
     def list(self, dir, num=100, page=1, order='time', desc=0, showempty=0):  # @ReservedAssignment
         '''
         文件列表
@@ -356,40 +363,86 @@ class BaiduPanClient():
         @param showempty: 不明，使用默认值
         '''
         pass
-    @rest_api('create', preset={'a':'commit', 'isdir':1, 'size':'', 'method':'post'}, post_field=['path', 'isdir', 'size', 'block_list', 'method'])
+    @normal_api('create', preset={'a':'commit', 'isdir':1, 'size':'', 'method':'post'}, post_field=['path', 'isdir', 'size', 'block_list', 'method'])
     def create_dir(self, path):
         '''
         创建目录
         @param path: 完整路径（不能一下创建多级目录）
         '''
         pass
-    @rest_api('filemanager', preset={'opera':'copy'}, post_field=['filelist'])
+    @normal_api('filemanager', preset={'opera':'copy'}, post_field=['filelist'])
     def copy(self, filelist):
         '''
         复制文件
         @param filelist: 复制操作，格式为：[{"path":"源文件路径","dest":"目标目录","newname":"新名称"},...]
         '''
         pass
-    @rest_api('filemanager', preset={'opera':'move'}, post_field=['filelist'])
+    @normal_api('filemanager', preset={'opera':'move'}, post_field=['filelist'])
     def move(self, filelist):
         '''
         移动文件
         @param filelist: 移动操作，格式为：[{"path":"源文件路径","dest":"目标目录","newname":"新名称"},...]
         '''
         pass
-    @rest_api('filemanager', preset={'opera':'delete'}, post_field=['filelist'])
+    @normal_api('filemanager', preset={'opera':'delete'}, post_field=['filelist'])
     def delete(self, filelist):
         '''
         删除文件
         @param filelist: 删除文件列表，格式为：["文件路径","文件路径",...]
         '''
         pass
-    @rest_api('download', preset={'type':'dlink'}, post_field=['sign', 'timestamp', 'fidlist', 'type'])
+    @normal_api('download', preset={'type':'dlink'}, post_field=['sign', 'timestamp', 'fidlist', 'type'])
     def download_link(self, sign, timestamp, fidlist):
         '''
         获取文件下载地址
         @param sign: 下载签名（从网盘首页页面中获取并计算）
         @param timestamp: 时间戳（从网盘首页页面中获取）
         @param fidlist: 要下载的文件列表，格式：[文件ID,文件ID,...]
+        '''
+        pass
+
+    @rest_api('membership/quota', preset={'method':'query'})
+    def membership_quota(self, function_name):
+        '''
+        查询用户功能限额
+        目前尚未完全理解返回值意义，此接口暂时不会使用
+        已知功能：dl_task_num - 离线下载任务数
+        @param function_name: 要查询的功能，格式：["name1","name2",...]
+        '''
+        pass
+    @rest_api('services/cloud_dl', preset={'method':'list_task', 'need_task_info':1})
+    def cloud_dl_list_task(self, start=0, limit=20, status=255):
+        '''
+        离线任务列表
+        @param start: 列表起始位置
+        @param limie: 列表最大数量
+        @param status: 推测为任务状态掩码，用来过滤列表，暂时传255即可
+        '''
+        pass
+    @rest_api('services/cloud_dl', preset={'method':'query_task', 'op_type':1})
+    def cloud_dl_query_task(self, task_ids):
+        '''
+        查询任务信息
+        @param task_ids: 要查询的任务ID集合，格式：id1,id2,id3...
+        '''
+        pass
+    @rest_api('services/cloud_dl', preset={'method':'query_sinfo', 'type':2})
+    def cloud_dl_query_bt_info(self, source_path):
+        '''
+        查询种子文件信息
+        @preset type: 2表示种子；推测1表示url，相应的source_path也传url
+        @param source_path: 种子文件路径（必须存在于网盘上）
+        '''
+        pass
+    @rest_api('services/cloud_dl', preset={'method':'add_task', 'type':2, 'task_from':2}, 
+                 post_field=['method', 'app_id', 'source_path', 'selected_idx', 'file_sha1', 'save_path', 'task_from', 'type', 't'])
+    def cloud_dl_add_bt_task(self, source_path, selected_idx, file_sha1, save_path):
+        '''
+        添加离线任务
+        @preset task_from: 意义不明
+        @param source_path: 种子文件路径（必须存在于网盘上）
+        @param selected_idx: 要下载的文件索引
+        @param file_sha1: 种子文件的哈希值
+        @param save_path: 网盘上的保存路径
         '''
         pass
