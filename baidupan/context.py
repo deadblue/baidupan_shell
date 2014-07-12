@@ -5,7 +5,7 @@ Created on 2014/07/06
 @author: deadblue
 '''
 
-from baidupan import api
+from baidupan import api, util, config
 import cookielib
 import os
 
@@ -13,41 +13,29 @@ import os
 _RWD = 'rwd'
 # 本地当前路径
 _LWD = 'lwd'
-
 # 上下文数据
-_data = {
-         _RWD : '/',
-         _LWD : '%s%s' % (os.getcwd(), os.sep)
-         }
-# 目录缓存
-_dir_cache = {}
-# 文件缓存
-_file_cache = {}
+_data = {}
 
-# 终端活动标记
-alive = True
-# cookie
-cookie_file = os.path.join(os.getenv('HOME'), '.baidupan.cookie')
-cookie_jar = cookielib.MozillaCookieJar(cookie_file)
-if os.path.exists(cookie_file):
-    cookie_jar.load()
-# API客户端实例
-client = api.BaiduPanClient(cookie_jar)
-
+def init():
+    _data[_RWD] = '/'
+    _data[_LWD] = config.get_localhome()
 def put(name, value):
     _data[name] = value
 def get(name):
     return _data.get(name)
-
 def get_rwd():
     return get(_RWD)
 def set_rwd(value):
     put(_RWD, value)
-
 def get_lwd():
     return get(_LWD)
 def set_lwd(value):
     put(_LWD, value)
+
+# 目录缓存
+_dir_cache = {}
+# 文件缓存
+_file_cache = {}
 
 def has_dir_cache(parent_dir):
     return _dir_cache.has_key(parent_dir)
@@ -62,3 +50,13 @@ def get_dir_from_cache(parent_dir):
     return _dir_cache.get(parent_dir)
 def get_file_from_cache(file_id):
     return _file_cache.get(file_id)
+
+# 终端活动标记
+alive = True
+# cookie
+cookie_file = util.get_data_file('.baidupan.cookie')
+cookie_jar = cookielib.MozillaCookieJar(cookie_file)
+if os.path.exists(cookie_file):
+    cookie_jar.load()
+# API客户端实例
+client = api.BaiduPanClient(cookie_jar)
