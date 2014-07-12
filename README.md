@@ -35,6 +35,7 @@ YunPan:/>ls
  * 不带参数时，列出全部配置项
  * 只传入config-name时，列出对应配置项的值
  * 同时传入config-name和config-value时，表示更新配置
+
 目前有效的配置包括：
  * downloader: 要使用的下载器，可选aria2c/curl/wget，默认curl
  * localhome: 初始的本地工作目录
