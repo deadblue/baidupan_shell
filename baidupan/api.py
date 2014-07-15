@@ -22,11 +22,11 @@ import urllib2
 __all__ = ['client', 'LoginException']
 
 _APP_ID = 250528
-_NORMAL_API_HOST = 'http://pan.baidu.com/api/'
-_REST_API_HOST = 'http://pan.baidu.com/rest/2.0/'
+_BAIDUPAN_HOST = 'http://pan.baidu.com/'
 _USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:30.0) Gecko/20100101 Firefox/30.0'
 
-def raw_api(url, preset={}, post_field=[]):
+def baidu_api(path, preset={}, post_field=[]):
+    url = '%s%s' % (_BAIDUPAN_HOST, path)
     def invoker_creator(func):
         def invoker(obj, *args, **kwargs):
             # 必要参数
@@ -45,6 +45,7 @@ def raw_api(url, preset={}, post_field=[]):
             call_args = inspect.getcallargs(func, obj, *args, **kwargs)
             for k,v in call_args.items():
                 if k == 'self' or v is None: continue
+                if type(v) is unicode: v = v.encode('utf-8')
                 get_data[k] = v
             # 处理需要post的参数
             post_data = {}
@@ -58,12 +59,6 @@ def raw_api(url, preset={}, post_field=[]):
             return result
         return invoker
     return invoker_creator
-def normal_api(path, preset={}, post_field=[]):
-    url = '%s%s' % (_NORMAL_API_HOST, path)
-    return raw_api(url, preset, post_field)
-def rest_api(path, preset={}, post_field=[]):
-    url = '%s%s' % (_REST_API_HOST, path)
-    return raw_api(url, preset, post_field)
 
 def _calc_download_sign(sign1, sign2):
     '''
@@ -343,7 +338,7 @@ class BaiduPanClient():
             reqs.append(req)
         return reqs[0] if len(reqs) == 1 else reqs
 
-    @normal_api('quota')
+    @baidu_api('api/quota')
     def quota(self, checkexpire=1, checkfree=1):
         '''
         获取空间使用状况
@@ -351,7 +346,7 @@ class BaiduPanClient():
         @param checkfree: 意义不明，使用默认值
         '''
         pass
-    @normal_api('list')
+    @baidu_api('api/list')
     def list(self, dir, num=100, page=1, order='time', desc=0, showempty=0):  # @ReservedAssignment
         '''
         文件列表
@@ -363,35 +358,35 @@ class BaiduPanClient():
         @param showempty: 不明，使用默认值
         '''
         pass
-    @normal_api('create', preset={'a':'commit', 'isdir':1, 'size':'', 'method':'post'}, post_field=['path', 'isdir', 'size', 'block_list', 'method'])
+    @baidu_api('api/create', preset={'a':'commit', 'isdir':1, 'size':'', 'method':'post'}, post_field=['path', 'isdir', 'size', 'block_list', 'method'])
     def create_dir(self, path):
         '''
         创建目录
         @param path: 完整路径（不能一下创建多级目录）
         '''
         pass
-    @normal_api('filemanager', preset={'opera':'copy'}, post_field=['filelist'])
+    @baidu_api('api/filemanager', preset={'opera':'copy'}, post_field=['filelist'])
     def copy(self, filelist):
         '''
         复制文件
         @param filelist: 复制操作，格式为：[{"path":"源文件路径","dest":"目标目录","newname":"新名称"},...]
         '''
         pass
-    @normal_api('filemanager', preset={'opera':'move'}, post_field=['filelist'])
+    @baidu_api('api/filemanager', preset={'opera':'move'}, post_field=['filelist'])
     def move(self, filelist):
         '''
         移动文件
         @param filelist: 移动操作，格式为：[{"path":"源文件路径","dest":"目标目录","newname":"新名称"},...]
         '''
         pass
-    @normal_api('filemanager', preset={'opera':'delete'}, post_field=['filelist'])
+    @baidu_api('api/filemanager', preset={'opera':'delete'}, post_field=['filelist'])
     def delete(self, filelist):
         '''
         删除文件
         @param filelist: 删除文件列表，格式为：["文件路径","文件路径",...]
         '''
         pass
-    @normal_api('download', preset={'type':'dlink'}, post_field=['sign', 'timestamp', 'fidlist', 'type'])
+    @baidu_api('api/download', preset={'type':'dlink'}, post_field=['sign', 'timestamp', 'fidlist', 'type'])
     def download_link(self, sign, timestamp, fidlist):
         '''
         获取文件下载地址
@@ -401,7 +396,7 @@ class BaiduPanClient():
         '''
         pass
 
-    @rest_api('membership/quota', preset={'method':'query'})
+    @baidu_api('rest/2.0/membership/quota', preset={'method':'query'})
     def membership_quota(self, function_name):
         '''
         查询用户功能限额
@@ -410,7 +405,7 @@ class BaiduPanClient():
         @param function_name: 要查询的功能，格式：["name1","name2",...]
         '''
         pass
-    @rest_api('services/cloud_dl', preset={'method':'list_task', 'need_task_info':1})
+    @baidu_api('rest/2.0/services/cloud_dl', preset={'method':'list_task', 'need_task_info':1})
     def cloud_dl_list_task(self, start=0, limit=20, status=255):
         '''
         离线任务列表
@@ -419,14 +414,14 @@ class BaiduPanClient():
         @param status: 推测为任务状态掩码，用来过滤列表，暂时传255即可
         '''
         pass
-    @rest_api('services/cloud_dl', preset={'method':'query_task', 'op_type':1})
+    @baidu_api('rest/2.0/services/cloud_dl', preset={'method':'query_task', 'op_type':1})
     def cloud_dl_query_task(self, task_ids):
         '''
         查询任务信息
         @param task_ids: 要查询的任务ID集合，格式：id1,id2,id3...
         '''
         pass
-    @rest_api('services/cloud_dl', preset={'method':'query_sinfo', 'type':2})
+    @baidu_api('rest/2.0/services/cloud_dl', preset={'method':'query_sinfo', 'type':2})
     def cloud_dl_query_bt_info(self, source_path):
         '''
         查询种子文件信息
@@ -434,7 +429,7 @@ class BaiduPanClient():
         @param source_path: 种子文件路径（必须存在于网盘上）
         '''
         pass
-    @rest_api('services/cloud_dl', preset={'method':'add_task', 'type':2, 'task_from':2}, 
+    @baidu_api('rest/2.0/services/cloud_dl', preset={'method':'add_task', 'type':2, 'task_from':2}, 
                  post_field=['method', 'app_id', 'source_path', 'selected_idx', 'file_sha1', 'save_path', 'task_from', 'type', 't'])
     def cloud_dl_add_bt_task(self, source_path, selected_idx, file_sha1, save_path):
         '''
@@ -444,5 +439,33 @@ class BaiduPanClient():
         @param selected_idx: 要下载的文件索引
         @param file_sha1: 种子文件的哈希值
         @param save_path: 网盘上的保存路径
+        '''
+        pass
+
+    @baidu_api('share/record', preset={'order':'ctime', 'desc':1})
+    def share_list(self, page=1):
+        '''
+        分享列表
+        目前百度盘页面使用本地js排序，因此各参数的取值暂不明确
+        @preset order: 排序方式，目前该参数传其他值没有效果
+        @preset desc: 是否降序，目前该参数传其他值没有效果
+        @param page: 分页页码，没有控制每页数据条数的参数，推测是服务器端定死的
+        '''
+        pass
+    @baidu_api('share/cancel', post_field=['shareid_list'])
+    def share_cancel(self, shareid_list):
+        '''
+        取消分享
+        @param shareid_list: 分享内容ID列表，格式：[share1_id,share2_id,...]
+        '''
+        pass
+    @baidu_api('share/set', preset={'channel_list':'[]'}, post_field=['fid_list', 'schannel', 'channel_list', 'pwd'])
+    def share_set(self, fid_list, schannel, pwd=None):
+        '''
+        创建分享
+        @preset channel_list: 该参数意义不明，因此暂时传固定值
+        @param fid_list: 要分享的文件ID
+        @param schannel: 分享渠道，0-公开分享，4-私密分享，其它数值意义不明
+        @param pwd: 私密分享时的密码，公开分享时不应传入
         '''
         pass
