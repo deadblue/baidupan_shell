@@ -8,6 +8,7 @@ Created on 2014/07/05
 from baidupan import context
 from baidupan.command import manager
 import readline
+import traceback
 
 __all__ = ['run']
 
@@ -49,7 +50,7 @@ class _Console():
             try:
                 cmd.execute(args)
             except:
-                print 'execute %s error!' % cmd.name
+                traceback.print_exc()
         # 流程结束时保存cookie
         context.cookie_jar.save()
 
