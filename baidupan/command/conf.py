@@ -11,8 +11,7 @@ from baidupan import config
 class ConfigCommand(Command):
     def __init__(self):
         Command.__init__(self, 'conf', False)
-    def execute(self, arg=None):
-        args = self._split_arg(arg)
+    def execute(self, args=None):
         if len(args) == 0:
             conf_data = config.get_all()
             for pair in conf_data.items():
@@ -21,8 +20,3 @@ class ConfigCommand(Command):
             print config.get(args[0])
         else:
             config.put(args[0], ' '.join(args[1:]))
-
-    def _split_arg(self, arg):
-        args = []
-        if arg: args = arg.split(' ')
-        return args
