@@ -41,3 +41,26 @@ def random_str(source, length):
     for _ in xrange(0, length):
         buf.append(random.choice(source))
     return ''.join(buf)
+
+class ArgumentTokenize(object):
+    def __init__(self, raw_args):
+        self._raw = raw_args
+        self._pointer = 0
+    def next(self):
+        if self._raw is None:
+            return None
+        if self._pointer >= len(self._raw):
+            return None
+        buf = []
+        quote = None
+        while self._pointer < len(self._raw):
+            ch = self._raw[self._pointer]
+            self._pointer += 1
+            if ch == ' ' and quote is None:
+                if len(buf) > 0: break
+                else: continue
+            elif ch == '"' or ch == "'":
+                if quote is None: quote = ch
+                elif quote == ch: quote = None
+            buf.append(ch)
+        return ''.join(buf) if len(buf) > 0 else None

@@ -17,6 +17,7 @@ from baidupan.command.play import PlayCommand
 from baidupan.command.pwd import PrintWorkingDirectoryCommand
 from baidupan.command.taskadd import CloudTaskAddCommand
 from baidupan.command.upload import UploadCommand
+from baidupan import util
 
 class _Manager():
     def __init__(self):
@@ -50,4 +51,16 @@ def parse_input(line):
     cmd_name = line if pos < 0 else line[0:pos]
     args = None if pos < 0 else line[pos+1:]
     cmd = _instance.get_command(cmd_name)
-    return cmd, args
+    return cmd, _split_args(args)
+def _split_args(args_str):
+    args = []
+    tker = util.ArgumentTokenize(args_str)
+    while 1:
+        arg = tker.next()
+        # 去掉收尾的引号
+        if arg[0] == '"' and arg[-1] == '"':
+            arg = arg[1:-1]
+        elif arg[0] == "'" and arg[-1] == "'":
+            arg = arg[1:-1]
+        args.append(arg)
+    return args[0] if len(args) == 1 else args
