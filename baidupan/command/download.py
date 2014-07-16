@@ -16,18 +16,19 @@ class NoSuchRemoteFileException(CommandExecuteException):
 class DownloadCommand(Command):
     def __init__(self):
         Command.__init__(self, 'download', True)
-    def execute(self, file_id=None):
-        if file_id is None:
-            raise InvalidArgumentException()
-        file_id = int(file_id)
-        # 获取文件信息
-        file_obj = context.get_file_from_cache(file_id)
-        if file_obj is None:
-            raise NoSuchRemoteFileException()
-        if file_obj['isdir'] == 0:
-            self._download_file(file_obj)
-        else:
-            self._download_dir(file_obj)
+    def execute(self, file_ids=None):
+        if len(file_ids) == 0: raise InvalidArgumentException()
+        for file_id in file_ids:
+            file_id = int(file_id)
+            # 获取文件信息
+            file_obj = context.get_file_from_cache(file_id)
+            if file_obj is None:
+                print 'No such file: %d' % file_id
+                continue
+            if file_obj['isdir'] == 0:
+                self._download_file(file_obj)
+            else:
+                self._download_dir(file_obj)
     def _download_file(self, file_obj):
         # 获取保存路径
         save_path = os.path.join(context.get_lwd(), file_obj['server_filename'])
