@@ -57,7 +57,8 @@ def _split_args(args_str):
     tker = util.ArgumentTokenize(args_str)
     while 1:
         arg = tker.next()
-        # 去掉收尾的引号
+        if arg is None: break
+        # 去掉首尾的引号
         if arg[0] == '"' and arg[-1] == '"':
             arg = arg[1:-1]
         elif arg[0] == "'" and arg[-1] == "'":
