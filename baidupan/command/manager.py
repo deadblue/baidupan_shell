@@ -5,6 +5,7 @@ Created on 2014/07/07
 @author: deadblue
 '''
 
+from baidupan import util
 from baidupan.command.cd import ChangeDirectoryCommand
 from baidupan.command.conf import ConfigCommand
 from baidupan.command.debug import DebugCommand
@@ -15,9 +16,9 @@ from baidupan.command.login import LoginCommand
 from baidupan.command.ls import ListCommand
 from baidupan.command.play import PlayCommand
 from baidupan.command.pwd import PrintWorkingDirectoryCommand
+from baidupan.command.rm import RemoveCommand
 from baidupan.command.taskadd import CloudTaskAddCommand
 from baidupan.command.upload import UploadCommand
-from baidupan import util
 
 class _Manager():
     def __init__(self):
@@ -33,15 +34,16 @@ _instance = _Manager()
 _instance.register(ConfigCommand())
 _instance.register(LoginCommand())
 _instance.register(PrintWorkingDirectoryCommand())
-_instance.register(ListCommand())
 _instance.register(ChangeDirectoryCommand())
 _instance.register(LocalChangeDirectoryCommand())
+_instance.register(ListCommand())
+_instance.register(RemoveCommand())
 _instance.register(UploadCommand())
 _instance.register(DownloadCommand())
 _instance.register(PlayCommand())
+_instance.register(CloudTaskAddCommand())
 _instance.register(ExitCommand())
 _instance.register(DebugCommand())
-_instance.register(CloudTaskAddCommand())
 
 def get_command_names():
     return _instance.get_command_names()

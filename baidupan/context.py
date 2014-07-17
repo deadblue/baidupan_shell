@@ -50,6 +50,9 @@ def get_dir_from_cache(parent_dir):
     return _dir_cache.get(parent_dir)
 def get_file_from_cache(file_id):
     return _file_cache.get(file_id)
+def delete_file_from_cache(file_id):
+    if _file_cache.has_key(file_id):
+        del _file_cache[file_id]
 
 # 终端活动标记
 alive = True
