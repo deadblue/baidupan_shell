@@ -57,6 +57,11 @@ remote-dir可是输入相对路径或绝对路径
 命令格式：pwd  
 会显示远程工作目录和本地工作目录  
 
+#### rm - 删除文件
+命令格式：rm fileid1-to-delete fileid2-to-delete ...  
+可批量删除网盘中的文件  
+**只可删除用ls命令列出过的文件，因为列印出的文件会缓存起来**  
+
 #### upload - 上传
 命令格式：upload file-to-upload  
 file-to-upload可以是绝对路径或相对路径。使用相对路径时，是相对于本地工作目录  
@@ -66,15 +71,14 @@ file-to-upload可以是绝对路径或相对路径。使用相对路径时，是
 *TODO：实现自动完成提示，支持批量上传*  
 
 #### download - 下载
-命令格式：download fileid-to-download  
-默认使用curl下载，支持wget（有问题）和aria2c  
-**一次只能下载一个文件**  
-*TODO：支持批量下载*  
+命令格式：download fileid1-to-download fileid2-to-download ...  
+默认使用curl下载，支持wget和aria2c，通过conf指令配置  
+**只可下载用ls命令列出过的文件，因为列印出的文件会缓存起来**  
 
 #### play - 播放
 命令格式：play fileid-to-play  
 调用mplayer进行播放  
-暂时其它需要支持的播放器  
+暂无其它需要支持的播放器  
 
 #### exit - 退出
 命令格式：exit  
