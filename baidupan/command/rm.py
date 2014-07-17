@@ -26,4 +26,3 @@ class RemoveCommand(Command):
             for file_path in file_list:
                 print file_path
         context.client.delete(json.dumps(file_list))
-        
