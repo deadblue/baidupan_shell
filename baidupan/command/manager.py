@@ -18,6 +18,7 @@ from baidupan.command.play import PlayCommand
 from baidupan.command.pwd import PrintWorkingDirectoryCommand
 from baidupan.command.rm import RemoveCommand
 from baidupan.command.taskadd import CloudTaskAddCommand
+from baidupan.command.tasklist import CloudTaskListCommand
 from baidupan.command.upload import UploadCommand
 
 class _Manager():
@@ -41,6 +42,7 @@ _instance.register(RemoveCommand())
 _instance.register(UploadCommand())
 _instance.register(DownloadCommand())
 _instance.register(PlayCommand())
+_instance.register(CloudTaskListCommand())
 _instance.register(CloudTaskAddCommand())
 _instance.register(ExitCommand())
 _instance.register(DebugCommand())
