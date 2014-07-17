@@ -421,6 +421,12 @@ class BaiduPanClient():
         @param task_ids: 要查询的任务ID集合，格式：id1,id2,id3...
         '''
         pass
+    @baidu_api('rest/2.0/services/cloud_dl', preset={'method':'clear_task'})
+    def cloud_dl_clear_task(self):
+        '''
+        清除已完成任务
+        '''
+        pass
     @baidu_api('rest/2.0/services/cloud_dl', preset={'method':'query_sinfo', 'type':2})
     def cloud_dl_query_bt_info(self, source_path):
         '''
@@ -439,6 +445,13 @@ class BaiduPanClient():
         @param selected_idx: 要下载的文件索引
         @param file_sha1: 种子文件的哈希值
         @param save_path: 网盘上的保存路径
+        '''
+        pass
+    @baidu_api('rest/2.0/services/cloud_dl', preset={'method':'cancel_task'})
+    def cloud_dl_task_cancel(self, task_id):
+        '''
+        取消一个未完成的离线任务
+        @param task_id: 任务id
         '''
         pass
 
