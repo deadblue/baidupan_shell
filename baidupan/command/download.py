@@ -18,6 +18,7 @@ class DownloadCommand(Command):
         Command.__init__(self, 'download', True)
     def execute(self, file_ids=None):
         if len(file_ids) == 0: raise InvalidArgumentException()
+        if type(file_ids) != list: file_ids = [file_ids]
         for file_id in file_ids:
             file_id = int(file_id)
             # 获取文件信息
