@@ -20,6 +20,7 @@ def _completer(prefix, index):
     if cmd is None:
         # 自动提示命令
         words = manager.get_command_names()
+        words = map(lambda x:'%s ' % x, words)
         words = filter(lambda x:x.startswith(prefix), words)
     else:
         # 自动提示参数

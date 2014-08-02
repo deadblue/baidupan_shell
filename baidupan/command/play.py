@@ -13,6 +13,10 @@ class PlayCommand(Command):
     def __init__(self):
         Command.__init__(self, 'play', True)
     def execute(self, file_id):
+        if type(file_id) is list: file_id = file_id[0]
         file_id = int(file_id)
         video_req = context.client.get_download_request(file_id)
-        mplayer.play(video_req, 848)
+        if type(video_req) is list and len(video_req):
+            print 'No such file!'
+        else:
+            mplayer.play(video_req, 848)
