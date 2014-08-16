@@ -9,9 +9,9 @@ from baidupan import context
 from baidupan.command import Command
 import os
 
-class CloudTaskAddCommand(Command):
+class AddBTCommand(Command):
     def __init__(self):
-        Command.__init__(self, 'taskadd', True)
+        Command.__init__(self, 'addbt', True)
     def execute(self, torrent_file):
         if type(torrent_file) is list: torrent_file = torrent_file[0]
         # 上传种子文件，获取上传后的保存路径

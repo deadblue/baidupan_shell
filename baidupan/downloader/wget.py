@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-wget下载器，传cookie有问题，待修正
+wget下载器
 Created on 2014/07/11
 
 @author: deadblue

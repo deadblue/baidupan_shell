@@ -8,9 +8,9 @@ Created on 2014/07/17
 from baidupan.command import Command
 from baidupan import context, util
 
-class CloudTaskListCommand(Command):
+class TaskListCommand(Command):
     def __init__(self):
-        Command.__init__(self, 'tasklist', True)
+        Command.__init__(self, 'tasks', True)
     def execute(self, arg=None):
         # 获取离线任务列表
         result = context.client.cloud_dl_list_task()

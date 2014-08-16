@@ -9,17 +9,18 @@ from baidupan import util
 from baidupan.command.cd import ChangeDirectoryCommand
 from baidupan.command.conf import ConfigCommand
 from baidupan.command.debug import DebugCommand
-from baidupan.command.download import DownloadCommand
 from baidupan.command.exit import ExitCommand
 from baidupan.command.lcd import LocalChangeDirectoryCommand
 from baidupan.command.login import LoginCommand
 from baidupan.command.ls import ListCommand
 from baidupan.command.play import PlayCommand
+from baidupan.command.pull import PullCommand
+from baidupan.command.push import PushCommand
 from baidupan.command.pwd import PrintWorkingDirectoryCommand
 from baidupan.command.rm import RemoveCommand
-from baidupan.command.taskadd import CloudTaskAddCommand
-from baidupan.command.tasklist import CloudTaskListCommand
-from baidupan.command.upload import UploadCommand
+from baidupan.command.addbt import AddBTCommand
+from baidupan.command.added2k import AddED2KCommand
+from baidupan.command.tasks import TaskListCommand
 
 class _Manager():
     def __init__(self):
@@ -39,11 +40,12 @@ _instance.register(ChangeDirectoryCommand())
 _instance.register(LocalChangeDirectoryCommand())
 _instance.register(ListCommand())
 _instance.register(RemoveCommand())
-_instance.register(UploadCommand())
-_instance.register(DownloadCommand())
+_instance.register(PushCommand())
+_instance.register(PullCommand())
 _instance.register(PlayCommand())
-_instance.register(CloudTaskListCommand())
-_instance.register(CloudTaskAddCommand())
+_instance.register(TaskListCommand())
+_instance.register(AddBTCommand())
+_instance.register(AddED2KCommand())
 _instance.register(ExitCommand())
 _instance.register(DebugCommand())
 

@@ -62,16 +62,16 @@ remote-dir可是输入相对路径或绝对路径
 可批量删除网盘中的文件  
 **只可删除用ls命令列出过的文件，因为列印出的文件会缓存起来**  
 
-#### upload - 上传
-命令格式：upload file-to-upload  
+#### push - 上传（原upload命令）
+命令格式：push file-to-upload
 file-to-upload可以是绝对路径或相对路径。使用相对路径时，是相对于本地工作目录  
 文件将上传到远程工作目录下  
 依赖curl工具  
 **一次只能上传一个文件**  
 *TODO：实现自动完成提示，支持批量上传*  
 
-#### download - 下载
-命令格式：download fileid1-to-download fileid2-to-download ...  
+#### pull - 下载（原download命令）
+命令格式：pull fileid1-to-download fileid2-to-download ...
 默认使用curl下载，支持wget和aria2c，通过conf指令配置  
 **只可下载用ls命令列出过的文件，因为列印出的文件会缓存起来**  
 
@@ -90,4 +90,4 @@ file-to-upload可以是绝对路径或相对路径。使用相对路径时，是
 
 ## 待添加的指令
 logout（注销）、cp（复制文件）、mv（移动文件）、rename（重命名）、  
-rm（删除）、mkdir（创建目录）、tasklist（离线任务列表）、taskadd（添加离线任务）
+rm（删除）、mkdir（创建目录）、tasks（离线任务列表）、bt（添加离线任务）

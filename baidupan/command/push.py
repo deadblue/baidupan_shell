@@ -9,9 +9,9 @@ from baidupan import context
 from baidupan.command import Command, InvalidArgumentException
 import os
 
-class UploadCommand(Command):
+class PushCommand(Command):
     def __init__(self):
-        Command.__init__(self, 'upload', True)
+        Command.__init__(self, 'push', True)
     def execute(self, arg=None):
         if arg is None: raise InvalidArgumentException()
         upload_file = arg if arg.startswith('/') else '%s%s' % (context.get_lwd(), arg)

@@ -13,9 +13,9 @@ import os
 class NoSuchRemoteFileException(CommandExecuteException):
     pass
 
-class DownloadCommand(Command):
+class PullCommand(Command):
     def __init__(self):
-        Command.__init__(self, 'download', True)
+        Command.__init__(self, 'pull', True)
     def execute(self, file_ids=None):
         if len(file_ids) == 0: raise InvalidArgumentException()
         if type(file_ids) != list: file_ids = [file_ids]
