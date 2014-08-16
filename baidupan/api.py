@@ -439,11 +439,20 @@ class BaiduPanClient():
                  post_field=['method', 'app_id', 'source_path', 'selected_idx', 'file_sha1', 'save_path', 'task_from', 'type', 't'])
     def cloud_dl_add_bt_task(self, source_path, selected_idx, file_sha1, save_path):
         '''
-        添加离线任务
+        添加bt离线任务
         @preset task_from: 意义不明
         @param source_path: 种子文件路径（必须存在于网盘上）
         @param selected_idx: 要下载的文件索引
         @param file_sha1: 种子文件的哈希值
+        @param save_path: 网盘上的保存路径
+        '''
+        pass
+    @baidu_api('rest/2.0/services/cloud_dl', preset={'method':'add_task', 'type':3},
+               post_field=['method', 'app_id', 'source_url', 'save_path', 'type'])
+    def cloud_dl_add_ed2k_task(self, source_url, save_path):
+        '''
+        添加ed2k离线任务
+        @param source_url: ed2k链接
         @param save_path: 网盘上的保存路径
         '''
         pass
