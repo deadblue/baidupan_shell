@@ -7,6 +7,7 @@ Created on 2014/07/07
 
 from baidupan import util
 from baidupan.command.cd import ChangeDirectoryCommand
+from baidupan.command.dl import CloudDownloadCommand
 from baidupan.command.conf import ConfigCommand
 from baidupan.command.debug import DebugCommand
 from baidupan.command.exit import ExitCommand
@@ -18,8 +19,6 @@ from baidupan.command.pull import PullCommand
 from baidupan.command.push import PushCommand
 from baidupan.command.pwd import PrintWorkingDirectoryCommand
 from baidupan.command.rm import RemoveCommand
-from baidupan.command.addbt import AddBTCommand
-from baidupan.command.added2k import AddED2KCommand
 from baidupan.command.tasks import TaskListCommand
 
 class _Manager():
@@ -44,8 +43,7 @@ _instance.register(PushCommand())
 _instance.register(PullCommand())
 _instance.register(PlayCommand())
 _instance.register(TaskListCommand())
-_instance.register(AddBTCommand())
-_instance.register(AddED2KCommand())
+_instance.register(CloudDownloadCommand())
 _instance.register(ExitCommand())
 _instance.register(DebugCommand())
 
@@ -60,14 +58,9 @@ def parse_input(line):
     return cmd, _split_args(args)
 def _split_args(args_str):
     args = []
-    tker = util.ArgumentTokenize(args_str)
+    tker = util.ArgumentTokenizer(args_str)
     while 1:
         arg = tker.next()
         if arg is None: break
-        # 去掉首尾的引号
-        if arg[0] == '"' and arg[-1] == '"':
-            arg = arg[1:-1]
-        elif arg[0] == "'" and arg[-1] == "'":
-            arg = arg[1:-1]
         args.append(arg)
     return args[0] if len(args) == 1 else args

@@ -11,11 +11,11 @@ from baidupan.command import Command
 class AddED2KCommand(Command):
     def __init__(self):
         Command.__init__(self, 'added2k', True)
-    def execute(self, arg=None):
-        if arg is None: return
+    def execute(self, link=None):
+        if link is None: return
         # 创建离线任务
         print 'Create cloud download task ...'
-        result = context.client.cloud_dl_add_ed2k_task(arg, context.get_rwd())
+        result = context.client.cloud_dl_add_ed2k_task(link, context.get_rwd())
         task_id = result['task_id']
         # 查询任务信息
         result = context.client.cloud_dl_query_task(task_id)
