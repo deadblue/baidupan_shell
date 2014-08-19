@@ -410,7 +410,7 @@ class BaiduPanClient():
         '''
         离线任务列表
         @param start: 列表起始位置
-        @param limie: 列表最大数量
+        @param limit: 列表最大数量
         @param status: 推测为任务状态掩码，用来过滤列表，暂时传255即可
         '''
         pass
@@ -433,6 +433,15 @@ class BaiduPanClient():
         查询种子文件信息
         @preset type: 2表示种子；推测1表示url，相应的source_path也传url
         @param source_path: 种子文件路径（必须存在于网盘上）
+        '''
+        pass
+    @baidu_api('rest/2.0/services/cloud_dl', preset={'method':'add_task'},
+               post_field=['method', 'app_id', 'source_url', 'save_path'])
+    def cloud_dl_add_http_task(self, source_url, save_path):
+        '''
+        创建http离线任务
+        @param source_url: 下载地址
+        @param save_path: 保存路径
         '''
         pass
     @baidu_api('rest/2.0/services/cloud_dl', preset={'method':'add_task', 'type':2, 'task_from':2}, 
