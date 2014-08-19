@@ -42,25 +42,40 @@ def random_str(source, length):
         buf.append(random.choice(source))
     return ''.join(buf)
 
-class ArgumentTokenize(object):
-    def __init__(self, raw_args):
-        self._raw = raw_args
+class ArgumentTokenizer(object):
+    def __init__(self, line):
+        self._raw = line
+        self._raw_length = 0 if line is None else len(line)
         self._pointer = 0
     def next(self):
         if self._raw is None:
-            return None
-        if self._pointer >= len(self._raw):
-            return None
+            return
+        if self._pointer >= self._raw_length:
+            return
         buf = []
-        quote = None
-        while self._pointer < len(self._raw):
+        while self._pointer < self._raw_length:
             ch = self._raw[self._pointer]
             self._pointer += 1
-            if ch == ' ' and quote is None:
-                if len(buf) > 0: break
-                else: continue
-            elif ch == '"' or ch == "'":
-                if quote is None: quote = ch
-                elif quote == ch: quote = None
-            buf.append(ch)
-        return ''.join(buf) if len(buf) > 0 else None
+            if len(buf) == 0:
+                if ch != ' ': buf.append(ch)
+            else:
+                if self._is_token_stop(buf, ch): break
+                else: buf.append(ch)
+        return self._escape_and_join(buf)
+    def _is_token_stop(self, buf, ch):
+        return ch == ' ' and buf[-1] != '\\' and self._is_quote_close(buf)
+    def _is_quote_close(self, buf):
+        quote_count = 0
+        for ch in buf:
+            if ch == '"':
+                quote_count += 1
+        return quote_count % 2 == 0
+    def _escape_and_join(self, buf):
+        if buf[0] == '"' and buf[-1] == '"':
+            buf = buf[1:-1]
+        for i in xrange(len(buf) - 1, 0, -1):
+            if buf[i] == ' ':
+                if i > 0 and buf[i-1] == '\\':
+                    del buf[i - 1]
+                    i -= 2
+        return ''.join(buf)
