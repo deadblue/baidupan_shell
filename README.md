@@ -80,17 +80,17 @@ file-to-upload可以是绝对路径或相对路径。使用相对路径时，是
 调用mplayer进行播放  
 暂无其它需要支持的播放器  
 
-#### tasks - 列出离线任务列表
-命令格式：tasks
-列出全部离线任务，包括正在进行的和已完成的
+#### tasks - 列出离线任务列表  
+命令格式：tasks  
+列出全部离线任务，包括正在进行的和已完成的  
 
-#### dl - 创建离线下载任务
-命令格式：dl download_link
-创建离线下载任务，支持http/https/ed2k/bt种子
-创建http/https/ed2k离线任务时，download_link为对应的链接
-创建bt离线任务时，download_link为网盘上或本地的种子文件名
+#### dl - 创建离线下载任务  
+命令格式：dl download_link  
+创建离线下载任务，支持http/https/ed2k/bt种子  
+创建http/https/ed2k离线任务时，download_link为对应的链接  
+创建bt离线任务时，download_link为网盘上或本地的种子文件名  
 
-#### exit - 退出
+#### exit - 退出  
 命令格式：exit  
 退出终端  
 
