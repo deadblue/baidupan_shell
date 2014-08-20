@@ -25,6 +25,8 @@ _APP_ID = 250528
 _BAIDUPAN_HOST = 'http://pan.baidu.com/'
 _USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:30.0) Gecko/20100101 Firefox/30.0'
 
+_logger = logging.getLogger('api')
+
 def baidu_api(path, preset={}, post_field=[]):
     url = '%s%s' % (_BAIDUPAN_HOST, path)
     def invoker_creator(func):
@@ -259,15 +261,16 @@ class BaiduPanClient():
         @param localfile: 本地文件完整路径
         '''
         url = 'https://c.pcs.baidu.com/rest/2.0/pcs/file'
-        query = {
-             'method' : 'upload',
-             'app_id' : _APP_ID,
-             'ondup' : 'newcopy',
-             'dir' : savedir,
-             'filename' : os.path.basename(localfile),
-             'BDUSS' : self.bduss
-             }
+        query = [
+            ('method', 'upload'),
+            ('app_id', _APP_ID),
+            ('ondup', 'newcopy'),
+            ('dir', savedir),
+            ('filename', os.path.basename(localfile)),
+            ('BDUSS', urllib.unquote(self.bduss))
+             ]
         url = '%s?%s' % (url, urllib.urlencode(query))
+        _logger.debug('upload url: %s' % url)
         req = http.MultipartRequest(url)
         req.set_parts([
                        http.FilePart('file', localfile)
@@ -286,14 +289,14 @@ class BaiduPanClient():
         @param localfile: 本地文件完整路径
         '''
         url = 'https://c.pcs.baidu.com/rest/2.0/pcs/file'
-        query = {
-             'method' : 'upload',
-             'app_id' : _APP_ID,
-             'ondup' : 'newcopy',
-             'dir' : savedir,
-             'filename' : os.path.basename(localfile),
-             'BDUSS' : self.bduss
-             }
+        query = [
+            ('method', 'upload'),
+            ('app_id', _APP_ID),
+            ('ondup', 'newcopy'),
+            ('dir', savedir),
+            ('filename', os.path.basename(localfile)),
+            ('BDUSS', urllib.unquote(self.bduss))
+             ]
         url = '%s?%s' % (url, urllib.urlencode(query))
         # 创建临时文件用来保存输出结果
         _, tmp_file = tempfile.mkstemp()
