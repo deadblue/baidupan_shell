@@ -5,7 +5,9 @@ Created on 2014/07/06
 @author: deadblue
 '''
 
+import logging
 import os
+import sys
 from baidupan import util, config
 
 # 远端当前路径
@@ -16,6 +18,8 @@ _LWD = 'lwd'
 _data = {}
 
 def init():
+    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout,
+                        format='%(levelname)s %(name)s - %(message)s')
     _data[_RWD] = '/'
     _data[_LWD] = config.get_localhome()
     # 标记为活动
