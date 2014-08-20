@@ -5,9 +5,8 @@ Created on 2014/07/06
 @author: deadblue
 '''
 
-from baidupan import api, util, config
-import cookielib
 import os
+from baidupan import util, config
 
 # 远端当前路径
 _RWD = 'rwd'
@@ -19,6 +18,18 @@ _data = {}
 def init():
     _data[_RWD] = '/'
     _data[_LWD] = config.get_localhome()
+    # 标记为活动
+    global alive
+    alive = True
+    # 初始化client
+    import cookielib
+    from baidupan import api
+    global cookie_jar, client
+    cookie_file = util.get_data_file('.baidupan.cookie')
+    cookie_jar = cookielib.MozillaCookieJar(cookie_file)
+    if os.path.exists(cookie_file): cookie_jar.load()
+    client = api.BaiduPanClient(cookie_jar)
+
 def put(name, value):
     _data[name] = value
 def get(name):
@@ -54,12 +65,7 @@ def delete_file_from_cache(file_id):
     if _file_cache.has_key(file_id):
         del _file_cache[file_id]
 
-# 终端活动标记
-alive = True
-# cookie
-cookie_file = util.get_data_file('.baidupan.cookie')
-cookie_jar = cookielib.MozillaCookieJar(cookie_file)
-if os.path.exists(cookie_file):
-    cookie_jar.load()
-# API客户端实例
-client = api.BaiduPanClient(cookie_jar)
+# 定义常量
+alive = None
+cookie_jar = None
+client = None
