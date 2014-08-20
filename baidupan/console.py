@@ -34,7 +34,7 @@ class _Console():
         readline.set_completer(_completer)
     def run(self):
         while context.alive:
-            prompt = 'YunPan:%s> ' % context.get_rwd()
+            prompt = 'BaiduPan:%s> ' % context.get_rwd()
             # 获取输入
             line = raw_input(prompt).strip()
             # 跳过空行
