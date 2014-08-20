@@ -14,6 +14,7 @@ from baidupan.command.exit import ExitCommand
 from baidupan.command.lcd import LocalChangeDirectoryCommand
 from baidupan.command.login import LoginCommand
 from baidupan.command.ls import ListCommand
+from baidupan.command.mkdir import CreateDirectoryCommand
 from baidupan.command.play import PlayCommand
 from baidupan.command.pull import PullCommand
 from baidupan.command.push import PushCommand
@@ -38,6 +39,7 @@ _instance.register(PrintWorkingDirectoryCommand())
 _instance.register(ChangeDirectoryCommand())
 _instance.register(LocalChangeDirectoryCommand())
 _instance.register(ListCommand())
+_instance.register(CreateDirectoryCommand())
 _instance.register(RemoveCommand())
 _instance.register(PushCommand())
 _instance.register(PullCommand())
