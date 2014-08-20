@@ -224,7 +224,7 @@ class BaiduPanClient():
                 'rsakey' : key_info['key']
                 }
         # 使用rsa加密密码
-        pubkey = key_info['pubkey'].replace('-----BEGIN PUBLIC KEY-----\r\n', '').replace('\r\n-----END PUBLIC KEY-----', '')
+        pubkey = key_info['pubkey'].replace('-----BEGIN PUBLIC KEY-----\n', '').replace('\n-----END PUBLIC KEY-----', '')
         pubkey = rsa.key.PublicKey.load_pkcs1_openssl_der(base64.decodestring(pubkey))
         form['password'] = base64.b64encode(rsa.encrypt(password, pubkey))
         # 发送登陆请求
@@ -239,7 +239,7 @@ class BaiduPanClient():
             # TODO: err_no=257 表示需要输入验证码，后续将处理这种情况
         else:
             raise LoginException(-1)
-        logging.debug('login successed!')
+        _logger.debug('login successed!')
     def login(self, account, password):
         '''
         登录网盘
@@ -247,7 +247,7 @@ class BaiduPanClient():
         @param password: 密码
         '''
         token = self._get_login_token()
-        logging.debug('login token: %s' % token)
+        _logger.debug('login token: %s' % token)
         self._login_check(token, account)
         key_info = self._get_public_key(token)
         self._do_login(account, password, token, key_info)
