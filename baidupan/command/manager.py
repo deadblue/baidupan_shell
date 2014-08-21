@@ -60,7 +60,7 @@ def parse_input(line):
     return cmd, _split_args(args)
 def _split_args(args_str):
     args = []
-    tker = util.ArgumentTokenizer(args_str)
+    tker = util.CommandArgumentTokenizer(args_str)
     while 1:
         arg = tker.next()
         if arg is None: break
