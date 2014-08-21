@@ -18,7 +18,11 @@ _LWD = 'lwd'
 _data = {}
 
 def init():
-    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout,
+    # 解析运行参数
+    args = util.parser_arguments(sys.argv[1:])
+    log_level = logging.DEBUG if args.get('debug') else logging.ERROR
+    # 设置日志级别
+    logging.basicConfig(level=log_level, stream=sys.stdout,
                         format='%(levelname)s %(name)s - %(message)s')
     _data[_RWD] = '/'
     _data[_LWD] = config.get_localhome()
