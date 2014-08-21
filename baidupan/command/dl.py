@@ -5,9 +5,9 @@ Created on 2014/08/19
 @author: deadblue
 '''
 
-import os
 from baidupan import context
 from baidupan.command import Command
+import os
 
 class CloudDownloadCommand(Command):
     def __init__(self):
@@ -59,7 +59,7 @@ class CloudDownloadCommand(Command):
         result = context.client.list(context.get_rwd())
         file_objs = result['list']
         for file_obj in file_objs:
-            if file_obj['server_filename'] == torrent_file:
+            if file_obj['server_filename'] == torrent_file.decode('utf-8'):
                 source_path = file_obj['path']
                 break
         # 若网盘上不存在则从本地查找
