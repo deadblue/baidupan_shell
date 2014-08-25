@@ -38,9 +38,11 @@ YunPan:/>ls
  * localhome: 初始的本地工作目录
 
 #### ls - 列印文件  
-格式：ls  
-目前列印格式还在调整中  
-*TODO：加上过滤参数*  
+格式：ls file-type  
+列印指定类型的文件  
+file-type为可选参数，不传时列出全部文件  
+要列出目录时，file-type传dir，其它情况传文件扩展名，如zip、mp4  
+可同时传入多个file-type，以空格分开，如```ls dir zip rar```   
 
 #### cd - 改变远程工作目录
 格式：cd remote-dir  
@@ -51,7 +53,6 @@ remote-dir可输入相对路径或绝对路径
 #### lcd - 改变本地工作目录
 格式：lcd local-dir  
 remote-dir可是输入相对路径或绝对路径  
-*TODO：本地工作目录作为可配置项存储起来*  
 
 #### pwd - 输出工作目录
 格式：pwd  
@@ -68,15 +69,16 @@ remote-dir可是输入相对路径或绝对路径
 **只可删除用ls命令列出过的文件，因为列印出的文件会缓存起来**  
 
 #### push - 上传（原upload命令）
-格式：push file-to-upload
-file-to-upload可以是绝对路径或相对路径。使用相对路径时，是相对于本地工作目录  
+格式：push file-to-upload  
+file-to-upload可以是绝对路径或相对路径  
+使用相对路径时，是相对于本地工作目录  
 文件将上传到远程工作目录下  
 依赖curl工具  
 **一次只能上传一个文件**  
 *TODO：实现自动完成提示，支持批量上传*  
 
 #### pull - 下载（原download命令）
-格式：pull fileid1-to-download fileid2-to-download ...
+格式：pull fileid1-to-download fileid2-to-download ...  
 默认使用curl下载，支持wget和aria2c，通过conf指令配置  
 **只可下载用ls命令列出过的文件，因为列印出的文件会缓存起来**  
 
