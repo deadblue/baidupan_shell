@@ -9,6 +9,7 @@ baidu_lixian
 ## 环境要求
  * Required:
   * python 2.7.x: https://www.python.org/download/
+  # Pillow: https://pillow.readthedocs.org/en/latest/
   * curl: http://curl.haxx.se/download.html
  * Optional:
   * mplayer: http://www.mplayerhq.hu/design7/dload.html
