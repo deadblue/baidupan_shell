@@ -3,13 +3,11 @@ baidu_lixian
 
 ## 项目简介
 百度盘管理终端  
-离线功能基本完成，普通用户每天只能无条件创建10个离线任务，之后会要求输入验证码  
-打滚求验证码解决方案...  
 
 ## 环境要求
  * Required:
   * python 2.7.x: https://www.python.org/download/
-  # Pillow: https://pillow.readthedocs.org/en/latest/
+  * Pillow: https://pillow.readthedocs.org/en/latest/
   * curl: http://curl.haxx.se/download.html
  * Optional:
   * mplayer: http://www.mplayerhq.hu/design7/dload.html
@@ -29,6 +27,7 @@ YunPan:/>ls
 格式：login your-account your-password  
 登录后会保存cookie，下次使用时不用重新登录  
 如需换号直接再执行login命令即可  
+**登录时需要输入验证码的情况尚未处理**  
 *TODO：增加注销命令*  
 
 #### conf - 配置
@@ -97,6 +96,7 @@ file-to-upload可以是绝对路径或相对路径
 创建离线下载任务，支持http/https/ed2k/bt种子  
 创建http/https/ed2k离线任务时，download_link为对应的链接  
 创建bt离线任务时，download_link为网盘上或本地的种子文件名  
+每天创建超过10个任务后会要求输入验证码  
 
 #### exit - 退出  
 格式：exit  
