@@ -8,6 +8,9 @@ Created on 2014/07/05
 import random
 import time
 import os
+import urllib2
+from baidupan import vcode
+
 
 def get_data_file(data_name):
     data_path = os.getenv('HOME') or os.getenv('USERPROFILE')
@@ -41,6 +44,10 @@ def random_str(source, length):
     for _ in xrange(0, length):
         buf.append(random.choice(source))
     return ''.join(buf)
+
+def vcode_handler(img_file):
+    print vcode.convert_ascii(img_file)
+    return raw_input('the CODE you see above: ')
 
 def parser_arguments(argv):
     arg_map = {}

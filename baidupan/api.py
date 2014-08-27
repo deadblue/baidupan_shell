@@ -56,8 +56,31 @@ def baidu_api(path, preset={}, post_field=[]):
                     if not get_data.has_key(field): continue
                     post_data[field] = get_data[field]
                     del get_data[field]
-            resp = obj._execute_request(url, get_data, post_data)
-            result = json.load(resp)
+            # 发送请求，出现网络问题时重试
+            retry = True
+            while retry:
+                try:
+                    resp = obj.execute_request(url, get_data, post_data)
+                    result = json.load(resp)
+                    retry = False
+                except urllib2.HTTPError as he:
+                    result = json.load(he)
+                    if result.get('error_code', 0) == -19:
+                        # 下载验证码图片
+                        vcode_resp = obj.execute_request(result['img'])
+                        _, tmp_file = tempfile.mkstemp(suffix='.jpg')
+                        vcode_file = open(tmp_file, 'wb')
+                        vcode_file.write(vcode_resp.read())
+                        vcode_file.close()
+                        _logger.debug('vcode image saved to: %s' % tmp_file)
+                        #
+                        post_data['vcode'] = result['vcode']
+                        post_data['input'] = obj.vcode_handler(tmp_file)
+                        retry = True
+                    else:
+                        retry = False
+                except:
+                    retry = True
             return result
         return invoker
     return invoker_creator
@@ -87,6 +110,10 @@ def _calc_download_sign(sign1, sign2):
         result.append( chr( ord(sign2[i]) ^ tmp ) )
     return base64.b64encode(''.join(result))
 
+def _default_vcode_handler(img_file):
+    print 'please tell me the code in file: %s' % img_file
+    return raw_input('code: ')
+
 class LoginException(Exception):
     def __init__(self, errno):
         self.erron = errno
@@ -94,23 +121,25 @@ class LoginException(Exception):
         return 'login error: %d' % self.erron
 
 class BaiduPanClient():
-    def __init__(self, cookie_jar=None):
+
+    def __init__(self, cookie_jar=None, vocde_handler=_default_vcode_handler):
         # 初始化urlopener
         self._cookie_jar = cookie_jar or cookielib.CookieJar()
         cookie_handler = urllib2.HTTPCookieProcessor(self._cookie_jar)
         self._url_opener = urllib2.build_opener(cookie_handler)
+        # 验证码处理函数
+        self.vcode_handler = vocde_handler
         # 获取登陆信息
         self.is_login = False
         self.user_name = self.bdstoken = self.bduss = None
         self.timpstamp = self.download_sign = None
         self._get_login_info()
-    
     def _get_login_info(self):
         '''
         判断是否成功登陆，并获取登陆后的相关信息
         '''
         url = 'http://pan.baidu.com/disk/home'
-        resp = self._execute_request(url)
+        resp = self.execute_request(url)
         html = resp.read()
         # 用户名
         try:
@@ -132,7 +161,7 @@ class BaiduPanClient():
         except:
             self.is_login = False
 
-    def _execute_request(self, url, get_data=None, post_data=None):
+    def execute_request(self, url, get_data=None, post_data=None):
         if get_data:
             get_data = urllib.urlencode(get_data)
             sep = '?' if url.find('?') < 0 else '&'
@@ -145,12 +174,25 @@ class BaiduPanClient():
         resp = self._url_opener.open(req)
         return resp
 
+    def login(self, account, password):
+        '''
+        登录网盘
+        @param account: 账户
+        @param password: 密码
+        '''
+        token = self._get_login_token()
+        _logger.debug('login token: %s' % token)
+        self._login_check(token, account)
+        key_info = self._get_public_key(token)
+        self._do_login(account, password, token, key_info)
+        # 获取登陆信息
+        self._get_login_info()
     def _get_login_token(self):
         '''
         获取登陆用token
         '''
         # 需要先访问网盘首页，获得一个cookie
-        self._execute_request('http://pan.baidu.com/')
+        self.execute_request('http://pan.baidu.com/')
         # 请求token
         cbs = 'bd__cbs__%s' % util.random_hex_str(6)
         url = 'https://passport.baidu.com/v2/api/?getapi'
@@ -162,7 +204,7 @@ class BaiduPanClient():
                  ('logintype', 'basicLogin'),
                  ('callback', cbs)
                  ]
-        resp = self._execute_request(url, query)
+        resp = self.execute_request(url, query)
         result = (resp.read()[len(cbs)+1:-1]).replace('\'', '"')
         result = json.loads(result)
         return result['data']['token']
@@ -181,7 +223,7 @@ class BaiduPanClient():
                  ('isphone', 'false'),
                  ('callback', cbs)
                  ]
-        self._execute_request(url, query)
+        self.execute_request(url, query)
     def _get_public_key(self, token):
         '''
         获取加密密码用的rsa公钥
@@ -195,7 +237,7 @@ class BaiduPanClient():
                  ('tt', util.timstamp()),
                  ('callback', cbs),
                  ]
-        resp = self._execute_request(url, query)
+        resp = self.execute_request(url, query)
         result = (resp.read()[len(cbs)+1:-1]).replace('\'', '"')
         return json.loads(result)
     def _do_login(self, account, password, token, key_info):
@@ -229,7 +271,7 @@ class BaiduPanClient():
         form['password'] = base64.b64encode(rsa.encrypt(password, pubkey))
         # 发送登陆请求
         url = 'https://passport.baidu.com/v2/api/?login'
-        resp = self._execute_request(url, None, form)
+        resp = self.execute_request(url, None, form)
         # 解析登陆结果
         body = resp.read()
         m = re.search('err_no=(\d+)&', body)
@@ -240,19 +282,6 @@ class BaiduPanClient():
         else:
             raise LoginException(-1)
         _logger.debug('login successed!')
-    def login(self, account, password):
-        '''
-        登录网盘
-        @param account: 账户
-        @param password: 密码
-        '''
-        token = self._get_login_token()
-        _logger.debug('login token: %s' % token)
-        self._login_check(token, account)
-        key_info = self._get_public_key(token)
-        self._do_login(account, password, token, key_info)
-        # 获取登陆信息
-        self._get_login_info()
 
     def upload(self, savedir, localfile):
         '''
@@ -301,18 +330,21 @@ class BaiduPanClient():
         # 创建临时文件用来保存输出结果
         _, tmp_file = tempfile.mkstemp()
         # 调用curl上传文件
-        cmd = ['curl']
-        cmd.append('-A "%s"' % _USER_AGENT)
-        cmd.append('-H "Expect:"')
-        cmd.append('-F "file=@%s;type=application/octet-stream"' % localfile)
-        cmd.append('-o "%s"' % tmp_file)    # 必须使用-o将执行结果转存，否则无法看到上传进度
-        cmd.append('"%s"' % url)
+        cmd = ['curl',
+               '-A "%s"' % _USER_AGENT,
+               '-H "Expect:"',
+               '-F "file=@%s;type=application/octet-stream"' % localfile,
+               '-o "%s"' % tmp_file,
+               '"%s"' % url
+        ]
         cmd = ' '.join(cmd)
         os.system(cmd)
         # 读取输出结果
         fp = open(tmp_file, 'r')
         result = json.load(fp)
         fp.close()
+        # 删除临时文件
+        os.remove(tmp_file)
         return result
 
     def get_download_request(self, file_id):
