@@ -11,7 +11,6 @@ import os
 import urllib2
 from baidupan import vcode
 
-
 def get_data_file(data_name):
     data_path = os.getenv('HOME') or os.getenv('USERPROFILE')
     return os.path.join(data_path, data_name)
@@ -46,7 +45,11 @@ def random_str(source, length):
     return ''.join(buf)
 
 def vcode_handler(img_file):
+    # 将验证码转换成ascii并输出到终端
     print vcode.convert_ascii(img_file)
+    # 删除临时文件
+    os.remove(img_file)
+    # 提示用户输入看到的验证码
     return raw_input('the CODE you see above: ')
 
 def parser_arguments(argv):
