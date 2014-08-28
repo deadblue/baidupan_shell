@@ -67,15 +67,9 @@ def baidu_api(path, preset={}, post_field=[]):
                     result = json.load(he)
                     if result.get('error_code', 0) == -19:
                         # 下载验证码图片
-                        vcode_resp = obj.execute_request(result['img'])
-                        _, tmp_file = tempfile.mkstemp(suffix='.jpg')
-                        vcode_file = open(tmp_file, 'wb')
-                        vcode_file.write(vcode_resp.read())
-                        vcode_file.close()
-                        _logger.debug('vcode image saved to: %s' % tmp_file)
-                        #
+                        vcode_file = obj.download_vcode_image(result['img'])
                         post_data['vcode'] = result['vcode']
-                        post_data['input'] = obj.vcode_handler(tmp_file)
+                        post_data['input'] = obj.vcode_handler(vcode_file)
                         retry = True
                     else:
                         retry = False
@@ -174,6 +168,15 @@ class BaiduPanClient():
         resp = self._url_opener.open(req)
         return resp
 
+    def download_vcode_image(self, url):
+        resp = self.execute_request(url)
+        _, vcode_file = tempfile.mkstemp(suffix='.jpg')
+        fp = open(vcode_file, 'wb')
+        fp.write(resp.read())
+        fp.close()
+        _logger.debug('vcode image saved to: %s' % vcode_file)
+        return vcode_file
+
     def login(self, account, password):
         '''
         登录网盘
@@ -241,6 +244,7 @@ class BaiduPanClient():
         result = (resp.read()[len(cbs)+1:-1]).replace('\'', '"')
         return json.loads(result)
     def _do_login(self, account, password, token, key_info):
+        url = 'https://passport.baidu.com/v2/api/?login'
         form = {
                 'staticpage' : 'http://pan.baidu.com/res/static/thirdparty/pass_v3_jump.html',
                 'charset' : 'utf-8',
@@ -270,15 +274,14 @@ class BaiduPanClient():
         pubkey = rsa.key.PublicKey.load_pkcs1_openssl_der(base64.decodestring(pubkey))
         form['password'] = base64.b64encode(rsa.encrypt(password, pubkey))
         # 发送登陆请求
-        url = 'https://passport.baidu.com/v2/api/?login'
         resp = self.execute_request(url, None, form)
         # 解析登陆结果
         body = resp.read()
         m = re.search('err_no=(\d+)&', body)
         if m is not None:
             err_no = int(m.group(1))
-            if err_no > 0: raise LoginException(err_no)
-            # TODO: err_no=257 表示需要输入验证码，后续将处理这种情况
+            if err_no != 0:
+                raise LoginException(err_no)
         else:
             raise LoginException(-1)
         _logger.debug('login successed!')
