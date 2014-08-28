@@ -10,13 +10,22 @@ def convert_ascii(img_file):
     w,h = img.size
     # 生成矩阵
     martix = []
-    for y in xrange(h):
+    for y in xrange(h / 2):
         row = []
         for x in xrange(w):
-            p = img.getpixel((x, y))
-            row.append(0 if p > 192 else 1)
+            p1 = img.getpixel((x, y * 2))
+            p2 = img.getpixel((x, y * 2 + 1))
+            if p1 > 192 and p2 > 192:
+                row.append(0)
+            elif p1 > 192:
+                row.append(1)
+            elif p2 > 192:
+                row.append(2)
+            else:
+                row.append(3)
+            #row.append(0 if p > 192 else 1)
         martix.append(row)
-    return _martix_to_map(_crop_and_border(martix))
+    return _martix_to_ascii(_crop_and_border(martix))
 
 def _crop_and_border(martix):
     # 统计四周空白大小
@@ -43,9 +52,9 @@ def _crop_and_border(martix):
         martix = martix[t-1:]
     else:
         martix.insert(0, [0] * w)
-    if b > 0:
+    if b > 1:
         martix = martix[:1-b]
-    else:
+    elif b == 0:
         martix.append([0] * w)
     # 左右裁剪与补边
     for ri in xrange(len(martix)):
@@ -54,17 +63,25 @@ def _crop_and_border(martix):
             row = row[l-1:]
         else:
             row.insert(0, 0)
-        if r > 0:
+        if r > 1:
             row = row[:1-r]
-        else:
+        elif r == 0:
             row.append(0)
         martix[ri] = row
     return martix
 
-def _martix_to_map(martix):
+def _martix_to_ascii(martix):
     buf = []
     for row in martix:
+        rbuf = []
         for cell in row:
-            buf.append('#' if cell == 0 else ' ')
-        buf.append('\n')
-    return ''.join(buf)
+            if cell == 0:
+                rbuf.append('#')
+            elif cell == 1:
+                rbuf.append('^')
+            elif cell == 2:
+                rbuf.append('_')
+            elif cell == 3:
+                rbuf.append(' ')
+        buf.append(''.join(rbuf))
+    return '\n'.join(buf)
