@@ -78,9 +78,9 @@ def _martix_to_ascii(martix):
             if cell == 0:
                 rbuf.append('#')
             elif cell == 1:
-                rbuf.append('^')
+                rbuf.append('"')
             elif cell == 2:
-                rbuf.append('_')
+                rbuf.append(',')
             elif cell == 3:
                 rbuf.append(' ')
         buf.append(''.join(rbuf))
