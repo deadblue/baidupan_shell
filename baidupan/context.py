@@ -32,7 +32,7 @@ def init():
     # 初始化client
     import cookielib
     from baidupan import api
-    global cookie_jar, client
+    global cookie_file, cookie_jar, client
     cookie_file = util.get_data_file('.baidupan.cookie')
     cookie_jar = cookielib.MozillaCookieJar(cookie_file)
     if os.path.exists(cookie_file): cookie_jar.load()
@@ -75,5 +75,6 @@ def delete_file_from_cache(file_id):
 
 # 定义常量
 alive = None
+cookie_file = None
 cookie_jar = None
 client = None
