@@ -3,13 +3,14 @@ baidu_lixian
 
 ## 项目简介
 百度盘管理终端  
-MacOSX下测试通过，Windows下目前还有很多问题……  
+**MacOSX下测试通过，Windows还存在一些兼容性问题**  
 
 ## 环境要求
  * Required:
   * python 2.7.x: https://www.python.org/download/
   * Pillow: https://pillow.readthedocs.org/en/latest/
   * curl: http://curl.haxx.se/download.html
+  * pyreadline(Windows需要): http://ipython.org/pyreadline.html
  * Optional:
   * mplayer: http://www.mplayerhq.hu/design7/dload.html
   * wget: https://www.gnu.org/software/wget/
