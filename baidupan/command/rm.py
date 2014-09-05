@@ -22,7 +22,9 @@ class RemoveCommand(Command):
             file_list.append(file_obj['path'])
             context.delete_file_from_cache(file_id)
         if len(file_list) > 0:
-            print '以下文件将被删除: '
+            print 'the following files will be deleted: '
             for file_path in file_list:
                 print file_path
+        else:
+            print 'nothing to delete'
         context.client.delete(json.dumps(file_list))
