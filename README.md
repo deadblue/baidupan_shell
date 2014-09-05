@@ -3,6 +3,7 @@ baidu_lixian
 
 ## 项目简介
 百度盘管理终端  
+MacOSX下测试通过，Windows下目前还有很多问题……  
 
 ## 环境要求
  * Required:
@@ -87,15 +88,15 @@ file-to-upload可以是绝对路径或相对路径
 调用mplayer进行播放  
 暂无其它需要支持的播放器  
 
-#### tasks - 列出离线任务列表  
+#### tasks - 列出离线任务  
 格式：tasks  
 列出全部离线任务，包括正在进行的和已完成的  
 
-#### dl - 创建离线下载任务  
-格式：dl download_link  
+#### dl - 离线下载  
+格式：dl download-link  
 创建离线下载任务，支持http/https/ed2k/bt种子  
-创建http/https/ed2k离线任务时，download_link为对应的链接  
-创建bt离线任务时，download_link为网盘上或本地的种子文件名  
+创建http/https/ed2k离线任务时，download-link为对应的链接  
+创建bt离线任务时，download-link为网盘上或本地的种子文件名  
 每天创建超过10个任务后会要求输入验证码  
 
 #### exit - 退出  
