@@ -10,7 +10,7 @@ import base64
 import cookielib
 import inspect
 import json
-import logging # @UnusedImport
+import logging
 import os
 import random
 import re
@@ -346,8 +346,6 @@ class BaiduPanClient():
         fp = open(tmp_file, 'r')
         result = json.load(fp)
         fp.close()
-        # 删除临时文件
-        os.remove(tmp_file)
         return result
 
     def get_download_request(self, file_id):
