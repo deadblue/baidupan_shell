@@ -24,7 +24,8 @@ def _completer(prefix, index):
         words = filter(lambda x:x.startswith(prefix), words)
     else:
         # 自动提示参数
-        words = cmd.get_completer_words(args)
+        arg_prefix = args[-1] if len(args) > 0 else ''
+        words = cmd.get_completer_words(arg_prefix)
     return words[index] if words and index < len(words) else None
 
 class _Console():
