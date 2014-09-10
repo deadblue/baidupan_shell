@@ -9,7 +9,6 @@ from baidupan import util
 from baidupan.command.cd import ChangeDirectoryCommand
 from baidupan.command.dl import CloudDownloadCommand
 from baidupan.command.conf import ConfigCommand
-from baidupan.command.debug import DebugCommand
 from baidupan.command.exit import ExitCommand
 from baidupan.command.lcd import LocalChangeDirectoryCommand
 from baidupan.command.login import LoginCommand
@@ -47,7 +46,6 @@ _instance.register(PlayCommand())
 _instance.register(TaskListCommand())
 _instance.register(CloudDownloadCommand())
 _instance.register(ExitCommand())
-_instance.register(DebugCommand())
 
 def get_command_names():
     return _instance.get_command_names()
@@ -65,4 +63,4 @@ def _split_args(args_str):
         arg = tker.next()
         if arg is None: break
         args.append(arg)
-    return args[0] if len(args) == 1 else args
+    return args
