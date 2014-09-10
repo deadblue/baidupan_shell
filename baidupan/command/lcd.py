@@ -12,13 +12,13 @@ import os
 class LocalChangeDirectoryCommand(Command):
     def __init__(self):
         Command.__init__(self, 'lcd', False)
-    def execute(self, arg=None):
-        if not arg: arg = '/'
+    def execute(self, args=[]):
+        target_dir = args[0] if len(args) > 0 else '/'
         lwd = context.get_lwd()
-        if arg.startswith('/'):
-            lwd = arg
+        if target_dir.startswith('/'):
+            lwd = target_dir
         else:
-            lwd = '%s%s' % (lwd, arg)
+            lwd = '%s%s' % (lwd, target_dir)
             lwd = os.path.abspath(lwd)
         if not lwd.endswith('/'):
             lwd += '/'

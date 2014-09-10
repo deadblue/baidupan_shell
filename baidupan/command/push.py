@@ -14,15 +14,12 @@ class PushCommand(Command):
     def __init__(self):
         Command.__init__(self, 'push', True)
 
-    def execute(self, args=None):
-        if args is None:
+    def execute(self, args):
+        if len(args) == 0:
             print 'nothing to push'
-            return
-        if type(args) is str:
-            self.upload_one_file(args)
         else:
-            for arg in args:
-                self.upload_one_file(arg)
+            for local_file in args:
+                self.upload_one_file(local_file)
 
     def upload_one_file(self, fn):
         upload_file = fn if fn.startswith('/') else '%s%s' % (context.get_lwd(), fn)

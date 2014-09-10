@@ -15,7 +15,7 @@ class Command():
     def __init__(self, name, need_login):
         self.name = name
         self.need_login = need_login
-    def execute(self, arg=None):
+    def execute(self, args):
         pass
     def get_completer_words(self, prefix):
         return []

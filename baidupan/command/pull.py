@@ -16,15 +16,12 @@ class NoSuchRemoteFileException(CommandExecuteException):
 class PullCommand(Command):
     def __init__(self):
         Command.__init__(self, 'pull', True)
-    def execute(self, file_ids=None):
-        if len(file_ids) == 0: raise InvalidArgumentException()
-        if type(file_ids) != list: file_ids = [file_ids]
-        for file_id in file_ids:
-            file_id = int(file_id)
+    def execute(self, args):
+        for file_id in args:
             # 获取文件信息
-            file_obj = context.get_file_from_cache(file_id)
+            file_obj = context.remote_tree.get_file_by_id(file_id)
             if file_obj is None:
-                print 'No such file: %d' % file_id
+                print 'no such file: %s' % file_id
                 continue
             if file_obj['isdir'] == 0:
                 self._download_file(file_obj)
@@ -47,4 +44,4 @@ class PullCommand(Command):
             from baidupan.downloader import curl
             curl.download(download_req, save_path)
     def _download_dir(self, dir_obj):
-        raise Exception('暂未实现目录下载！')
+        raise Exception('unimplement!')

@@ -12,12 +12,13 @@ import os
 class CloudDownloadCommand(Command):
     def __init__(self):
         Command.__init__(self, 'dl', True)
-    def execute(self, arg=None):
-        if type(arg) is list:
-            self._execute_one(arg[0])
+    def execute(self, args):
+        if len(args) == 0:
+            print 'nothing to download'
         else:
-            self._execute_one(arg)
-    def _execute_one(self, source):
+            self._download(args[0])
+
+    def _download(self, source):
         task_id = None
         if source.startswith('http:') or source.startswith('https:'):
             task_id = self._download_http(source)
@@ -40,19 +41,16 @@ class CloudDownloadCommand(Command):
                 print 'task: %s / progress: %.2f%%' % (task_info['task_name'], finished_present)
         else:
             print 'can not create download task!'
-
     def _download_http(self, link):
         print 'create download for http ...'
         result = context.client.cloud_dl_add_http_task(link, context.get_rwd())
         task_id = result['task_id'] if result.has_key('task_id') else None
         return task_id
-
     def _download_ed2k(self, link):
         print 'create download for ed2k ...'
         result = context.client.cloud_dl_add_ed2k_task(link, context.get_rwd())
         task_id = result['task_id'] if result.has_key('task_id') else None
         return task_id
-
     def _download_torrent(self, torrent_file):
         source_path = None
         # 从网盘上查找种子文件

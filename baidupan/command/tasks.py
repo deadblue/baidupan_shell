@@ -11,7 +11,7 @@ from baidupan import context, util
 class TaskListCommand(Command):
     def __init__(self):
         Command.__init__(self, 'tasks', True)
-    def execute(self, arg=None):
+    def execute(self, args):
         # 获取离线任务列表
         result = context.client.cloud_dl_list_task()
         task_ids = map(lambda x:x['task_id'], result['task_info'])

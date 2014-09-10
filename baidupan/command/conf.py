@@ -11,7 +11,7 @@ from baidupan import config
 class ConfigCommand(Command):
     def __init__(self):
         Command.__init__(self, 'conf', False)
-    def execute(self, args=None):
+    def execute(self, args):
         if len(args) == 0:
             conf_data = config.get_all()
             for pair in conf_data.items():

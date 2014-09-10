@@ -11,6 +11,6 @@ from baidupan import context
 class PrintWorkingDirectoryCommand(Command):
     def __init__(self):
         Command.__init__(self, 'pwd', True)
-    def execute(self, arg=None):
+    def execute(self, args):
         print 'remote: %s' % context.get_rwd()
         print 'local : %s' % context.get_lwd()

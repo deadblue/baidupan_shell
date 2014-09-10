@@ -5,25 +5,25 @@ Created on 2014/07/07
 @author: deadblue
 '''
 
-from baidupan import context
+from baidupan import context, path
 from baidupan.command import Command
 import os
 
 class ChangeDirectoryCommand(Command):
     def __init__(self):
         Command.__init__(self, 'cd', True)
-    def execute(self, arg=None):
-        if not arg: arg = '/'
+
+    def execute(self, args):
+        target_dir = args[0] if len(args) > 0 else '/'
         rwd = context.get_rwd()
-        if arg.startswith('/'):
-            rwd = arg
+        if target_dir.startswith('/'):
+            rwd = target_dir
         else:
-            rwd = '%s%s' % (rwd, arg)
-            rwd = os.path.abspath(rwd)
-            if not rwd.endswith('/'):
-                rwd += '/'
-        # TODO 检查目录是否存在
+            rwd = '%s%s' % (rwd, target_dir)
+            rwd = path.remote_abspath(rwd)
+        if not rwd.endswith('/'): rwd += '/'
         context.set_rwd(rwd)
+
     def get_completer_words(self, prefix):
         '''
         TODO 自动完成存在问题，推测与unicode有关
