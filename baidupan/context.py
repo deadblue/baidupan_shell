@@ -31,12 +31,13 @@ def init():
     alive = True
     # 初始化client
     import cookielib
-    from baidupan import api
-    global cookie_file, cookie_jar, client
+    from baidupan import api, tree
+    global cookie_file, cookie_jar, client, remote_tree
     cookie_file = util.get_data_file('.baidupan.cookie')
     cookie_jar = cookielib.MozillaCookieJar(cookie_file)
     if os.path.exists(cookie_file): cookie_jar.load()
     client = api.BaiduPanClient(cookie_jar, util.vcode_handler)
+    remote_tree = tree.RemoteTree(client)
 
 def put(name, value):
     _data[name] = value
@@ -78,3 +79,4 @@ alive = None
 cookie_file = None
 cookie_jar = None
 client = None
+remote_tree = None
