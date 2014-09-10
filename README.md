@@ -4,6 +4,7 @@ baidu_lixian
 ## 项目简介
 百度盘管理终端  
 **MacOSX下测试通过，Windows还存在一些兼容性问题**  
+**当前是一个正在重构中的版本，可能无法正常使用**  
 
 ## 环境要求
  * Required:
@@ -70,7 +71,7 @@ remote-dir可是输入相对路径或绝对路径
 可批量删除网盘中的文件  
 **只可删除用ls命令列出过的文件，因为列印出的文件会缓存起来**  
 
-#### push - 上传（原upload命令）
+#### push - 上传
 格式：push file-to-upload  
 file-to-upload可以是绝对路径或相对路径  
 使用相对路径时，是相对于本地工作目录  
@@ -79,7 +80,7 @@ file-to-upload可以是绝对路径或相对路径
 **一次只能上传一个文件**  
 *TODO：实现自动完成提示，支持批量上传*  
 
-#### pull - 下载（原download命令）
+#### pull - 下载
 格式：pull fileid1-to-download fileid2-to-download ...  
 默认使用curl下载，支持wget和aria2c，通过conf指令配置  
 **只可下载用ls命令列出过的文件，因为列印出的文件会缓存起来**  
@@ -103,10 +104,6 @@ file-to-upload可以是绝对路径或相对路径
 #### exit - 退出  
 格式：exit  
 退出终端  
-
-#### debug - 调试
-格式：debug  
-输出调试信息，随着开发的推进，输出的信息也会不一样  
 
 ## 待添加的指令
 logout（注销）、cp（复制文件）、mv（移动文件）、rename（重命名）
