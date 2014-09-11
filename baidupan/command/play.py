@@ -22,3 +22,7 @@ class PlayCommand(Command):
                 print 'No such file!'
             else:
                 mplayer.play(video_req, 848)
+    def get_completer_words(self, prefix):
+        file_list = context.remote_tree.list_file(parent_dir=context.get_rwd())
+        file_ids = map(lambda x:str(x['fs_id']), file_list)
+        return filter(lambda x:len(prefix) == 0 or x.startswith(prefix), file_ids)
