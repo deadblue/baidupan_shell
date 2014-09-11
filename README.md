@@ -104,5 +104,8 @@ file-to-upload可以是绝对路径或相对路径
 格式：exit  
 退出终端  
 
-## 待添加的指令
-logout（注销）、cp（复制文件）、mv（移动文件）、rename（重命名）
+## 后续开发计划
+ * 增加命令：mv（移动文件）、rename（重命名）、share（分享文件）等
+ * 除baidupan_cli外，增加baidupan_push等直接执行特定动作的接口，便于和脚本结合
+ * 其他：欢迎提供建议……
+
