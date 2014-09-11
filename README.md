@@ -20,8 +20,8 @@ baidu_lixian
 ## 使用方式
 ```
 python baidupan_cli.py
-YunPan:/>login your-account your-password
-YunPan:/>ls
+BaiduPan:/>login your-account your-password
+BaiduPan:/>ls
 ...
 ```
 
@@ -50,12 +50,11 @@ file-type为可选参数，不传时列出全部文件
 #### cd - 改变远程工作目录
 格式：cd remote-dir  
 remote-dir可输入相对路径或绝对路径  
-目前自动提示存在问题，推测与unicode有关，找时间好好修一下  
-*TODO：完善自动完成提示，校验远程目录是否存在*  
 
 #### lcd - 改变本地工作目录
 格式：lcd local-dir  
 remote-dir可是输入相对路径或绝对路径  
+**lcd指令在Windows系统下有问题，待修复**
 
 #### pwd - 输出工作目录
 格式：pwd  
@@ -72,13 +71,12 @@ remote-dir可是输入相对路径或绝对路径
 **只可删除用ls命令列出过的文件，因为列印出的文件会缓存起来**  
 
 #### push - 上传
-格式：push file-to-upload  
+格式：push file1-to-upload file2-to-upload ...  
 file-to-upload可以是绝对路径或相对路径  
 使用相对路径时，是相对于本地工作目录  
 文件将上传到远程工作目录下  
+可一次上传多个文件  
 依赖curl工具  
-**一次只能上传一个文件**  
-*TODO：实现自动完成提示，支持批量上传*  
 
 #### pull - 下载
 格式：pull fileid1-to-download fileid2-to-download ...  
