@@ -45,3 +45,8 @@ class PullCommand(Command):
             curl.download(download_req, save_path)
     def _download_dir(self, dir_obj):
         raise Exception('unimplement!')
+
+    def get_completer_words(self, prefix):
+        file_list = context.remote_tree.list_file(parent_dir=context.get_rwd())
+        file_ids = map(lambda x:'%d ' % x['fs_id'], file_list)
+        return filter(lambda x:len(prefix) == 0 or x.startswith(prefix), file_ids)
