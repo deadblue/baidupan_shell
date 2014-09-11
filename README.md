@@ -1,8 +1,9 @@
-baidu_lixian
+baidupan_shell
 ============
 
 ## 项目简介
 百度盘管理终端  
+项目从baidu_lixian更名为baidupan_shell，因为实现的功能不止是离线下载  
 **MacOSX下测试通过，Windows还存在一些兼容性问题**  
 **当前是一个正在重构中的版本，可能无法正常使用**  
 
