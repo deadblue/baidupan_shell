@@ -2,6 +2,27 @@
 
 __author__ = 'deadblue'
 
+def remote_is_root(fullpath):
+    return fullpath == '/'
+
+def remote_abspath(full_path):
+    if full_path is None:
+        return '/'
+    dirs = full_path.split('/')
+    seps = []
+    for d in dirs:
+        if d == '.': continue
+        if d == '..':
+            if len(seps) > 1: seps.pop()
+            else: continue
+        else:
+            seps.append(d)
+    return '/'.join(seps)
+
+def remote_splitpath(fullpath):
+    pos = fullpath.rfind('/')
+    return fullpath[0:pos + 1], fullpath[pos+1:]
+
 class RemoteTree():
     '''
     对远程文件树的访问和缓存处理
@@ -56,9 +77,19 @@ class RemoteTree():
                             break
         return file_list
     def list_dir(self, parent_dir='/'):
-        return self.list(parent_dir=parent_dir, show_dir=True, show_file=False, force_fetch=False)
+        return self.list(parent_dir=parent_dir,
+                         show_dir=True, show_file=False, force_fetch=False)
     def list_file(self, parent_dir='/'):
-        return self.list(parent_dir=parent_dir, show_dir=False, show_file=True, force_fetch=False)
+        return self.list(parent_dir=parent_dir,
+                         show_dir=False, show_file=True, force_fetch=False)
+    def dir_exists(self, dir_path):
+        if remote_is_root(dir_path): return True
+        if dir_path.endswith('/'): dir_path = dir_path[:-1]
+        parent_dir, name = remote_splitpath(dir_path)
+        dirs = self.list_dir(parent_dir)
+        # python2处理unicode真是奇葩
+        dir_names = map(lambda x:x['server_filename'].encode('utf-8'), dirs)
+        return name in dir_names
     def get_file_by_id(self, file_id):
         return self.file_cache.get(file_id)
     def remote_file_from_cache(self, file_id):
