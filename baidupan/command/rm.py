@@ -12,6 +12,7 @@ import json
 class RemoveCommand(Command):
     def __init__(self):
         Command.__init__(self, 'rm', True)
+
     def execute(self, args):
         file_list = []
         for file_id in args:

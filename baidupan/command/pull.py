@@ -16,6 +16,7 @@ class NoSuchRemoteFileException(CommandExecuteException):
 class PullCommand(Command):
     def __init__(self):
         Command.__init__(self, 'pull', True)
+
     def execute(self, args):
         for file_id in args:
             # 获取文件信息

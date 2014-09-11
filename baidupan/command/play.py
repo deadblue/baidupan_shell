@@ -12,6 +12,7 @@ from baidupan.player import mplayer
 class PlayCommand(Command):
     def __init__(self):
         Command.__init__(self, 'play', True)
+
     def execute(self, args):
         if len(args) == 0:
             print 'nothing to play!'
@@ -22,6 +23,7 @@ class PlayCommand(Command):
                 print 'No such file!'
             else:
                 mplayer.play(video_req, 848)
+
     def get_completer_words(self, prefix):
         file_list = context.remote_tree.list_file(parent_dir=context.get_rwd())
         file_ids = map(lambda x:str(x['fs_id']), file_list)

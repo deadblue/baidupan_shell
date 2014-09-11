@@ -15,11 +15,13 @@ class ListCommand(Command):
     def __init__(self):
         Command.__init__(self, 'ls', True)
     def execute(self, args):
-        # 按名称降序获取文件列表
-        rwd = context.get_rwd()
+        # 处理过滤条件
         show_dir = len(args) == 0 or 'dir' in args
-        file_list = context.remote_tree.list(rwd, show_dir=show_dir, show_file=True,
-                                             show_exts=args, force_fetch=True)
+        show_file = not ('dir' in args and len(args) == 1)
+        exts = filter(lambda x:x!='dir', args)
+        file_list = context.remote_tree.list(context.get_rwd(),
+                                             show_dir=show_dir, show_file=show_file,
+                                             show_exts=exts, force_fetch=True)
         self._print_file_list(file_list)
     def _print_file_list(self, files):
         print '| %-16s | %-19s | %-10s | %s' % ('file_id', 'modify_time', 'size', 'name')

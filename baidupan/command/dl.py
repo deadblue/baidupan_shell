@@ -12,12 +12,12 @@ import os
 class CloudDownloadCommand(Command):
     def __init__(self):
         Command.__init__(self, 'dl', True)
+
     def execute(self, args):
         if len(args) == 0:
             print 'nothing to download'
         else:
             self._download(args[0])
-
     def _download(self, source):
         task_id = None
         if source.startswith('http:') or source.startswith('https:'):
