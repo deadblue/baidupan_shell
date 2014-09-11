@@ -54,10 +54,9 @@ class CloudDownloadCommand(Command):
     def _download_torrent(self, torrent_file):
         source_path = None
         # 从网盘上查找种子文件
-        result = context.client.list(context.get_rwd())
-        file_objs = result['list']
-        for file_obj in file_objs:
-            if file_obj['server_filename'] == torrent_file.decode('utf-8'):
+        file_list = context.remote_tree.list_file(context.get_rwd())
+        for file_obj in file_list:
+            if file_obj['server_filename'].encode('utf-8') == torrent_file:
                 source_path = file_obj['path']
                 break
         # 若网盘上不存在则从本地查找
