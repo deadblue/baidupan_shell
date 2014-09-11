@@ -78,6 +78,12 @@ def parser_arguments(argv):
         arg_map[arg_name] = True
     return arg_map
 
+def escape_arg(arg):
+    return arg.replace('\\ ', ' ')
+
+def unescape_arg(arg):
+    return arg.replace(' ', '\\ ')
+
 class CommandArgumentTokenizer(object):
     def __init__(self, line):
         self._raw = line
@@ -109,9 +115,4 @@ class CommandArgumentTokenizer(object):
     def _escape_and_join(self, buf):
         if buf[0] == '"' and buf[-1] == '"':
             buf = buf[1:-1]
-        for i in xrange(len(buf) - 1, 0, -1):
-            if buf[i] == ' ':
-                if i > 0 and buf[i-1] == '\\':
-                    del buf[i - 1]
-                    i -= 2
-        return ''.join(buf)
+        return escape_arg(''.join(buf))
