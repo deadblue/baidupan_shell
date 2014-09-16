@@ -36,7 +36,7 @@ def init():
     cookie_file = util.get_data_file('.baidupan.cookie')
     cookie_jar = cookielib.MozillaCookieJar(cookie_file)
     if os.path.exists(cookie_file): cookie_jar.load()
-    client = api.BaiduPanClient(cookie_jar, util.vcode_handler)
+    client = api.BaiduPanClient(cookie_jar, util.ascii_vcode_handler)
     remote_tree = tree.RemoteTree(client)
 
 def put(name, value):

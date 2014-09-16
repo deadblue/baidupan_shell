@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from StringIO import StringIO
+
 from PIL import Image
 
 __author__ = 'deadblue'
 
-def convert_ascii(img_file):
-    img = Image.open(img_file, 'r')
+def convert_ascii(img_data):
+    img = Image.open(StringIO(img_data))
     img = img.convert('L')
     w,h = img.size
     # 生成矩阵

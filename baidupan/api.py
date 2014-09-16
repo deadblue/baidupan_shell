@@ -15,7 +15,6 @@ import os
 import random
 import re
 import rsa
-import tempfile
 import urllib
 import urllib2
 
@@ -67,9 +66,9 @@ def baidu_api(path, preset={}, post_field=[]):
                     result = json.load(he)
                     if result.get('error_code', 0) == -19:
                         # 下载验证码图片
-                        vcode_file = obj.download_vcode_image(result['img'])
+                        vcode_image = obj.download_vcode_image(result['img'])
                         post_data['vcode'] = result['vcode']
-                        post_data['input'] = obj.vcode_handler(vcode_file)
+                        post_data['input'] = obj.vcode_handler(vcode_image)
                         retry = True
                     else:
                         retry = False
@@ -104,10 +103,6 @@ def _calc_download_sign(sign1, sign2):
         result.append( chr( ord(sign2[i]) ^ tmp ) )
     return base64.b64encode(''.join(result))
 
-def _default_vcode_handler(img_file):
-    print 'please tell me the code in file: %s' % img_file
-    return raw_input('code: ')
-
 class LoginException(Exception):
     def __init__(self, errno):
         self.erron = errno
@@ -116,7 +111,7 @@ class LoginException(Exception):
 
 class BaiduPanClient():
 
-    def __init__(self, cookie_jar=None, vocde_handler=_default_vcode_handler):
+    def __init__(self, cookie_jar=None, vocde_handler=util.default_vcode_handler):
         # 初始化urlopener
         self._cookie_jar = cookie_jar or cookielib.CookieJar()
         cookie_handler = urllib2.HTTPCookieProcessor(self._cookie_jar)
@@ -170,12 +165,7 @@ class BaiduPanClient():
 
     def download_vcode_image(self, url):
         resp = self.execute_request(url)
-        _, vcode_file = tempfile.mkstemp(suffix='.jpg')
-        fp = open(vcode_file, 'wb')
-        fp.write(resp.read())
-        fp.close()
-        _logger.debug('vcode image saved to: %s' % vcode_file)
-        return vcode_file
+        return resp.read()
 
     def login(self, account, password):
         '''

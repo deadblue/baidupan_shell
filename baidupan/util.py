@@ -44,13 +44,19 @@ def random_str(source, length):
         buf.append(random.choice(source))
     return ''.join(buf)
 
-def vcode_handler(img_file):
+def default_vcode_handler(img_data):
+    import tempfile
+    _, tmp_file_path = tempfile.mkstemp(suffix='.jpg')
+    with open(tmp_file_path, 'wb') as fp:
+        fp.write(img_data)
+    print 'vcode image saved to: %s' % tmp_file_path
+    return raw_input('Verification code: ')
+
+def ascii_vcode_handler(img_data):
     # 将验证码转换成ascii并输出到终端
-    print vcode.convert_ascii(img_file)
-    # 删除临时文件
-    os.remove(img_file)
+    print vcode.convert_ascii(img_data)
     # 提示用户输入看到的验证码
-    return raw_input('the CODE you see above: ')
+    return raw_input('The CODE you see above: ')
 
 def parser_arguments(argv):
     arg_map = {}
