@@ -14,17 +14,11 @@ def play(video_req, zoom=None):
     @param video_req: 视频请求
     @param zoom: 缩放设置
     '''
-    cmd = ['mplayer']
-    # 减少输出
-    cmd.append('-quiet')    # -really-quiet
-    # 播放界面
-    cmd.append('-osdlevel')
-    cmd.append('1')
-    # 优先使用IPv4
-    cmd.append('-prefer-ipv4')
-    # 缓冲区大小
-    cmd.append('-cache')
-    cmd.append('8192')
+    cmd = ['mplayer',
+           '-quiet',            # 减少输出
+           '-osdlevel', '1',    # 界面选项
+           '-prefer-ipv4',      # 优先使用IPv4
+           '-cache', '8192']    # 缓冲区大小
     # 缩放参数的处理
     if zoom:
         if type(zoom) is str and zoom == 'fs':
