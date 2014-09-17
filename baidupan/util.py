@@ -8,8 +8,6 @@ Created on 2014/07/05
 import random
 import time
 import os
-import urllib2
-from baidupan import vcode
 
 def get_data_file(data_name):
     data_path = os.getenv('HOME') or os.getenv('USERPROFILE')
@@ -54,6 +52,7 @@ def default_vcode_handler(img_data):
 
 def ascii_vcode_handler(img_data):
     # 将验证码转换成ascii并输出到终端
+    from baidupan import vcode
     print vcode.convert_ascii(img_data)
     # 提示用户输入看到的验证码
     return raw_input('The CODE you see above: ')
