@@ -5,7 +5,6 @@ Created on 2014/06/27
 @author: deadblue
 '''
 
-from baidupan import http, util
 import base64
 import cookielib
 import inspect
@@ -14,9 +13,13 @@ import logging
 import os
 import random
 import re
-import rsa
 import urllib
 import urllib2
+import tempfile
+
+from baidupan import http, util
+import rsa
+
 
 __all__ = ['client', 'LoginException']
 
