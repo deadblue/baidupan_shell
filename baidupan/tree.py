@@ -2,13 +2,15 @@
 
 __author__ = 'deadblue'
 
-def remote_is_root(fullpath):
+# 远程文件系统相关方法
+
+def remote_isroot(fullpath):
     return fullpath == '/'
 
-def remote_abspath(full_path):
-    if full_path is None:
+def remote_abspath(fullpath):
+    if fullpath is None:
         return '/'
-    dirs = full_path.split('/')
+    dirs = fullpath.split('/')
     seps = []
     for d in dirs:
         if d == '.': continue
@@ -21,7 +23,7 @@ def remote_abspath(full_path):
 
 def remote_splitpath(fullpath):
     pos = fullpath.rfind('/')
-    return fullpath[0:pos + 1], fullpath[pos+1:]
+    return fullpath[0:pos+1], fullpath[pos+1:]
 
 class RemoteTree():
     '''
@@ -83,7 +85,7 @@ class RemoteTree():
         return self.list(parent_dir=parent_dir,
                          show_dir=False, show_file=True, force_fetch=False)
     def dir_exists(self, dir_path):
-        if remote_is_root(dir_path): return True
+        if remote_isroot(dir_path): return True
         if dir_path.endswith('/'): dir_path = dir_path[:-1]
         parent_dir, name = remote_splitpath(dir_path)
         dirs = self.list_dir(parent_dir)
@@ -99,13 +101,43 @@ class RemoteTree():
             # delete from file cahce
             del self.file_cache[file_id]
 
-class LocalTree():
-    def __init__(self):
-        import platform
-        sys_name = platform.system()
-        self.is_win = sys_name == 'Windows'
-    def is_full_path(self, path):
-        if self.is_win:
-            pass
+# 本地文件系统相关
+import os
+import platform
+from os import path
+
+def local_isroot(full_path):
+    if platform.system().lower() == 'windows':
+        return full_path.endswith(':\\')
+    else:
+        return full_path == '/'
+
+def local_isabspath(full_path):
+    if platform.system().lower() == 'windows':
+        return full_path.find(':\\') > 0
+    else:
+        return full_path.startswith('/')
+
+def local_abspath(full_path):
+    seps = []
+    dirs = full_path.split(os.sep)
+    for d in dirs:
+        if d == '.': continue
+        if d == '..':
+            if len(seps) > 1: seps.pop()
+            else: continue
         else:
-            return path.startswith('/')
+            seps.append(d)
+    return os.sep.join(seps)
+
+def local_splitpath(full_path):
+    pos = full_path.rfind(os.sep)
+    return full_path[0:pos+1], full_path[pos+1:]
+
+def local_listdir(parent_dir):
+    subs = os.listdir(parent_dir)
+    return filter(lambda sub:path.isdir(path.join(parent_dir, sub)), subs)
+
+def local_listfile(parent_dir):
+    subs = os.listdir(parent_dir)
+    return filter(lambda sub:path.isfile(path.join(parent_dir, sub)), subs)
