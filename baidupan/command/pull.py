@@ -29,8 +29,10 @@ class PullCommand(Command):
             else:
                 self._download_dir(file_obj)
     def _download_file(self, file_obj):
+        file_name = file_obj['server_filename'].encode('utf-8')
+        print 'pull file: %s ...' % file_name
         # 获取保存路径
-        save_path = os.path.join(context.get_lwd(), file_obj['server_filename'])
+        save_path = os.path.join(context.get_lwd(), file_name)
         download_req = context.client.get_download_request(file_obj['fs_id'])
         # 调用用户配置的下载器进行下载
         dler = config.get_downloader()
