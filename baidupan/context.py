@@ -20,10 +20,12 @@ _data = {}
 def init():
     # 解析运行参数
     args = util.parser_arguments(sys.argv[1:])
-    log_level = logging.DEBUG if args.get('debug') else logging.ERROR
     # 设置日志级别
-    logging.basicConfig(level=log_level, stream=sys.stdout,
-                        format='%(levelname)s %(name)s - %(message)s')
+    global log_file
+    log_file = open(os.path.join(os.getcwd(), 'baidupan.log'), 'a')
+    log_level = logging.DEBUG if args.get('debug') else logging.ERROR
+    logging.basicConfig(level=log_level, stream=log_file,
+                        format='%(asctime)s %(levelname)s %(name)s - %(message)s')
     _data[_RWD] = '/'
     _data[_LWD] = config.get_localhome()
     # 标记为活动
@@ -75,6 +77,7 @@ def delete_file_from_cache(file_id):
         del _file_cache[file_id]
 
 # 定义常量
+log_file = None
 alive = None
 cookie_file = None
 cookie_jar = None
