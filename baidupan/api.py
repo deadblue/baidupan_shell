@@ -20,7 +20,6 @@ import tempfile
 from baidupan import http, util
 import rsa
 
-
 __all__ = ['client', 'LoginException']
 
 _APP_ID = 250528
@@ -324,7 +323,7 @@ class BaiduPanClient():
              ]
         url = '%s?%s' % (url, urllib.urlencode(query))
         # 创建临时文件用来保存输出结果
-        _, tmp_file = tempfile.mkstemp()
+        _, tmp_file = tempfile.mkstemp(suffix='.json')
         # 调用curl上传文件
         cmd = ['curl',
                '-A "%s"' % _USER_AGENT,
