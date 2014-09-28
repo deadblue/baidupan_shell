@@ -35,11 +35,18 @@ class FilePart(Part):
         # 文件名
         self.filename = os.path.basename(filename)
     def get_data(self):
-        buf = []
-        buf.append('Content-Disposition: form-data; name="%s"; filename="%s"\r\n' % (self.name, self.filename))
-        buf.append('Content-Type: application/octet-stream\r\n\r\n')
-        buf.append(self.filedata)
-        buf.append('\r\n')
+        buf = ['Content-Disposition: form-data; name="%s"; filename="%s"\r\n' % (self.name, self.filename),
+               'Content-Type: application/octet-stream\r\n\r\n', self.filedata, '\r\n']
+        return ''.join(buf)
+
+class FileDataPart(Part):
+    def __init__(self, name, filename, filedata):
+        Part.__init__(self, name)
+        self.filename = filename
+        self.filedata = filedata
+    def get_data(self):
+        buf = ['Content-Disposition: form-data; name="%s"; filename="%s"\r\n' % (self.name, self.filename),
+               'Content-Type: application/octet-stream\r\n\r\n', self.filedata, '\r\n']
         return ''.join(buf)
 
 class MultipartRequest(urllib2.Request):
