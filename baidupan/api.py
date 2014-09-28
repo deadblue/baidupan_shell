@@ -305,6 +305,35 @@ class BaiduPanClient():
             return json.load(resp)
         except urllib2.HTTPError as he:
             return json.load(he)
+    def upload_data(self, savedir, filename, filedata):
+        '''
+        上传文件数据
+        :param savedir: 远程保存路径
+        :param filename: 保存文件名
+        :param filedata: 文件数据
+        :return:
+        '''
+        url = 'https://c.pcs.baidu.com/rest/2.0/pcs/file'
+        query = [
+            ('method', 'upload'),
+            ('app_id', _APP_ID),
+            ('ondup', 'newcopy'),
+            ('dir', savedir),
+            ('filename', filename),
+            ('BDUSS', urllib.unquote(self.bduss))
+             ]
+        url = '%s?%s' % (url, urllib.urlencode(query))
+        _logger.debug('upload url: %s' % url)
+        req = http.MultipartRequest(url)
+        req.set_parts([
+                       http.FileDataPart('file', filename, filedata)
+                       ])
+        req.add_header('User-Agent', _USER_AGENT)
+        try:
+            resp = urllib2.urlopen(req)
+            return json.load(resp)
+        except urllib2.HTTPError as he:
+            return json.load(he)
     def upload_curl(self, savedir, localfile):
         '''
         使用curl上传文件
@@ -391,6 +420,13 @@ class BaiduPanClient():
         '''
         创建目录
         @param path: 完整路径（不能一下创建多级目录）
+        '''
+        pass
+    @baidu_api('api/filemanager', preset={'opera':'rename','async':1}, post_field=['filelist'])
+    def rename(self, filelist):
+        '''
+        重命名文件
+        @param filelist: 重命名操作，格式：[{"path":"源文件路径","newname":"新文件名"},...]
         '''
         pass
     @baidu_api('api/filemanager', preset={'opera':'copy'}, post_field=['filelist'])
