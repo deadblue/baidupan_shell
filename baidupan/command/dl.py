@@ -5,9 +5,11 @@ Created on 2014/08/19
 @author: deadblue
 '''
 
+import json
+import os
+
 from baidupan import context
 from baidupan.command import Command
-import os
 
 class CloudDownloadCommand(Command):
     def __init__(self):
@@ -67,17 +69,18 @@ class CloudDownloadCommand(Command):
                 print 'upload torrent file: %s ...' % torrent_file
                 result = context.client.upload(context.get_rwd(), torrent_file)
                 source_path = result['path']
-            else:
-                # do nothing?
-                pass
         if source_path is None:
             print 'no such torrent file!'
             return None
+        # 获取种子文件信息
+        print 'query torrent info ...'
+        result = context.client.cloud_dl_query_bt_info(source_path)
+        bt_info = result.get('torrent_info')
+        # 创建bt任务
+        task_id = None
+        if bt_info is None:
+            print 'can\'t get torrent info!'
         else:
-            # 创建bt任务
-            print 'query torrent info ...'
-            result = context.client.cloud_dl_query_bt_info(source_path)
-            bt_info = result['torrent_info']
             print 'create download for bt ...'
             # 选择种子中的全部文件
             selected_idx = map(lambda x:str(x+1), xrange(0, bt_info['file_count']))
@@ -85,4 +88,7 @@ class CloudDownloadCommand(Command):
             # 创建离线下载任务
             result = context.client.cloud_dl_add_bt_task(source_path, selected_idx, bt_info['sha1'], context.get_rwd())
             task_id = result['task_id'] if result.has_key('task_id') else None
-            return task_id
+        # 删除种子文件
+        print 'delete torrent file ...'
+        context.client.delete(json.dumps([source_path]))
+        return task_id
