@@ -20,6 +20,7 @@ from baidupan.command.push import PushCommand
 from baidupan.command.pwd import PrintWorkingDirectoryCommand
 from baidupan.command.rm import RemoveCommand
 from baidupan.command.tasks import TaskListCommand
+from baidupan.command.unmask import UnmaskCommand
 
 class _Manager():
     def __init__(self):
@@ -45,6 +46,7 @@ _instance.register(PullCommand())
 _instance.register(PlayCommand())
 _instance.register(TaskListCommand())
 _instance.register(CloudDownloadCommand())
+_instance.register(UnmaskCommand())
 _instance.register(ExitCommand())
 
 def get_command_names():

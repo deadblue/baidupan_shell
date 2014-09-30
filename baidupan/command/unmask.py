@@ -60,7 +60,7 @@ class UnmaskCommand(Command):
     def _unmask_dir(self, dir_obj, name_dic):
         # 查询下级文件列表
         sub_objs = context.remote_tree.list(dir_obj['path'], show_dir=True, show_file=True, force_fetch=True)
-        # 重命名操作
+        # 先重命名下级文件
         for sub_obj in sub_objs:
             file_name = sub_obj['server_filename'].encode('utf-8')
             if not name_dic.has_key(file_name): continue
@@ -68,12 +68,11 @@ class UnmaskCommand(Command):
                 self._unmask_file(sub_obj, name_dic)
             else:
                 self._unmask_dir(sub_obj, name_dic)
+        # 重命名目录
         file_name = dir_obj['server_filename'].encode('utf-8')
         print 'rename: %s => %s' % (file_name, name_dic[file_name])
-        # 重命名目录
         context.remote_tree.rename(dir_obj['path'], name_dic[file_name])
     def _unmask_file(self, file_obj, name_dic):
         file_name = file_obj['server_filename'].encode('utf-8')
         print 'rename: %s => %s' % (file_name, name_dic[file_name])
-        # 重命名文件
         context.remote_tree.rename(file_obj['path'], name_dic[file_name])
