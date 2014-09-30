@@ -9,8 +9,11 @@ from baidupan import context
 from baidupan.command import manager
 import readline
 import traceback
+import logging
 
 __all__ = ['run']
+
+_logger = logging.getLogger('console')
 
 def _completer(prefix, index):
     # 获取当前行
@@ -57,4 +60,6 @@ class _Console():
         context.cookie_jar.save()
 
 def run():
+    # 初始化命令管理器
+    manager.init()
     _Console().run()
