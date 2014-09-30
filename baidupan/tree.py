@@ -2,6 +2,8 @@
 
 __author__ = 'deadblue'
 
+import json
+
 # 远程文件系统相关方法
 
 def remote_isroot(fullpath):
@@ -92,6 +94,10 @@ class RemoteTree():
         # python2处理unicode真是奇葩
         dir_names = map(lambda x:x['server_filename'].encode('utf-8'), dirs)
         return name in dir_names
+    def rename(self, file_path, new_name):
+        op = [{'path':file_path, 'newname':new_name}]
+        self.client.rename(json.dumps(op))
+        # TODO: update tree cache
     def get_file_by_id(self, file_id):
         return self.file_cache.get(file_id)
     def remote_file_from_cache(self, file_id):
@@ -101,7 +107,9 @@ class RemoteTree():
             # delete from file cahce
             del self.file_cache[file_id]
 
+
 # 本地文件系统相关
+
 import os
 import platform
 from os import path
