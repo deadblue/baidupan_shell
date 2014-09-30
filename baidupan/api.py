@@ -164,7 +164,6 @@ class BaiduPanClient():
         req.add_header('Referer', 'http://pan.baidu.com/disk/home')
         resp = self._url_opener.open(req)
         return resp
-
     def download_vcode_image(self, url):
         resp = self.execute_request(url)
         return resp.read()
@@ -394,6 +393,16 @@ class BaiduPanClient():
             self._cookie_jar.add_cookie_header(req)
             reqs.append(req)
         return reqs[0] if len(reqs) == 1 else reqs
+    def download_data(self, file_id):
+        '''
+        下载数据
+        用于直接读取网盘上文件的内容，不建议对大文件使用
+        :param file_id:
+        :return:
+        '''
+        req = self.get_download_request(file_id)
+        resp = self._url_opener.open(req)
+        return resp.read()
 
     @baidu_api('api/quota')
     def quota(self, checkexpire=1, checkfree=1):
