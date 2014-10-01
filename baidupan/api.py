@@ -115,9 +115,10 @@ class BaiduPanClient():
 
     def __init__(self, cookie_jar=None, vocde_handler=util.default_vcode_handler):
         # 初始化urlopener
-        self._cookie_jar = cookie_jar or cookielib.CookieJar()
-        cookie_handler = urllib2.HTTPCookieProcessor(self._cookie_jar)
-        self._url_opener = urllib2.build_opener(cookie_handler)
+        self._cookie_jar = cookielib.CookieJar() if cookie_jar is None else cookie_jar
+        self._url_opener = urllib2.build_opener(
+            urllib2.HTTPCookieProcessor(self._cookie_jar)
+        )
         # 验证码处理函数
         self.vcode_handler = vocde_handler
         # 获取登陆信息
