@@ -5,44 +5,34 @@ Created on 2014/07/07
 @author: deadblue
 '''
 
-from baidupan import context
-from baidupan.command import Command
+import logging
 import os
+
+from baidupan import context, tree
+from baidupan.command import Command
+
+_logger = logging.getLogger('lcd')
 
 class LocalChangeDirectoryCommand(Command):
     def __init__(self):
         Command.__init__(self, 'lcd', False)
     def execute(self, args=[]):
-        target_dir = args[0] if len(args) > 0 else '/'
+        target_dir = args[0] if len(args) > 0 else ''
         lwd = context.get_lwd()
-        if target_dir.startswith('/'):
+        if tree.local_isabspath(target_dir):
             lwd = target_dir
         else:
-            lwd = '%s%s' % (lwd, target_dir)
-            lwd = os.path.abspath(lwd)
-        if not lwd.endswith('/'):
-            lwd += '/'
-        # 设置本地工作目录
-        if os.path.exists(lwd):
-            context.set_lwd(lwd)
-        else:
-            print 'No such path!'
-    def get_completer_words(self, prefix):
-        # 获取要寻址的路径
-        if prefix.startswith('/'):
-            lwd = prefix
-        else:
-            if prefix is None: prefix = ''
-            lwd = '%s%s' % (context.get_lwd(), prefix)
-        # 处理路径中的相对路径
-        if lwd.endswith('/'):
-            lwd = os.path.abspath(lwd) + '/'
-        else:
-            lwd = os.path.abspath(lwd)
-        # 拆分出父目录和子目录前缀
-        parent_dir, sub_prefix = os.path.split(lwd)
-        # 列出父目录下所有目录
-        sub_dirs = os.listdir(parent_dir)
-        # 列出所有符合前缀的子目录
-        sub_dirs = filter(lambda x:x.startswith(sub_prefix), sub_dirs)
-        return map(lambda x:'%s/' % x, sub_dirs)
+            lwd = os.path.join(lwd, target_dir)
+        lwd = tree.local_abspath(lwd)
+        if not lwd.endswith(os.sep):
+            lwd += os.sep
+        context.set_lwd(lwd)
+
+    def get_completer_words(self, target_dir):
+        if not tree.local_isabspath(target_dir):
+            target_dir = os.path.join(context.get_lwd(), target_dir)
+        parent_dir, prefix = tree.local_splitpath(target_dir)
+        sub_dirs = filter(lambda x:len(prefix) == 0 or x.startswith(prefix),
+                          tree.local_listdir(parent_dir))
+        _logger.debug(sub_dirs)
+        return map(lambda x:'%s%s' % (x,os.sep), sub_dirs)
