@@ -3,22 +3,16 @@ baidupan_shell
 
 ## 项目简介
 百度盘管理终端  
-项目从baidu_lixian更名为baidupan_shell  
-**MacOSX下测试通过，Windows还存在一些兼容性问题**  
-**当前是一个正在重构中的版本，可能无法正常使用**  
+**使用说明逐步移至wiki中**
+**MacOSX下测试通过，正在进行对Windows的兼容**  
 
 ## 环境要求
 已更新到wiki  
 
 ## 使用方式
-```
-python baidupan_cli.py
-BaiduPan:/>login your-account your-password
-BaiduPan:/>ls
-...
-```
+已更新到wiki  
 
-## 命令说明
+## 命令说明(逐步转移到wiki)
 **命令参数中带空格的情况下，请将参数用双引号引起来**
 
 #### login - 登录
@@ -88,12 +82,8 @@ file-to-upload可以是绝对路径或相对路径
 列出全部离线任务，包括正在进行的和已完成的  
 
 #### dl - 离线下载  
-格式：dl \[--mask\] download-link  
-创建离线下载任务，支持http/https/ed2k/bt种子  
-创建http/https/ed2k离线任务时，download-link为对应的链接  
-创建bt离线任务时，download-link为网盘上或本地的种子文件名  
-使用"--mask"参数时，表示创建离线任务前自动混淆文件名，只对bt种子有效  
-每天创建超过10个任务后会要求输入验证码  
+已移至wiki  
+该命令预计调整，合并tasks的功能  
 
 #### exit - 退出  
 格式：exit  
@@ -103,4 +93,3 @@ file-to-upload可以是绝对路径或相对路径
  * 增加命令：mv（移动文件）、rename（重命名）、share（分享文件）等
  * 除baidupan_cli外，增加baidupan_push等直接执行特定动作的接口，便于和脚本结合
  * 其他：欢迎提供建议……
- 
