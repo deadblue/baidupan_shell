@@ -29,7 +29,7 @@ class PullCommand(Command):
             else:
                 self._download_dir(file_obj)
     def _download_file(self, file_obj):
-        file_name = file_obj['server_filename'].encode('utf-8')
+        file_name = file_obj['server_filename']
         print 'pull file: %s ...' % file_name
         # 获取保存路径
         save_path = os.path.join(context.get_lwd(), file_name)
