@@ -26,6 +26,9 @@ class PushCommand(Command):
         if os.path.exists(upload_file) and os.path.isfile(upload_file):
             print 'upload file: %s ...' % upload_file
             result = context.client.upload_curl(context.get_rwd(), upload_file)
-            print 'file saved to: %s !' % result.get('path')
+            if result.get('error_code') > 0:
+                print 'upload failed! error code: %d' % result['error_code']
+            else:
+                print 'file saved to: %s !' % result.get('path')
         else:
             print 'no such file!'
