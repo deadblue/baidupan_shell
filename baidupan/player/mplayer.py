@@ -5,9 +5,7 @@ Created on 2014/07/11
 @author: deadblue
 '''
 
-import locale
-import subprocess
-from baidupan import context
+from baidupan import context, util
 
 def play(video_req, zoom=None):
     '''
@@ -45,6 +43,6 @@ def play(video_req, zoom=None):
     # cookie
     cmd.extend(['-cookies', '-cookies-file', context.cookie_file])
     # 视频地址
-    cmd.append(video_req.get_full_url().encode(locale.getpreferredencoding()))
+    cmd.append(video_req.get_full_url())
     # 执行命令
-    subprocess.call(cmd)
+    return util.subprocess_call(cmd)
