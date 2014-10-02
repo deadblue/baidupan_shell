@@ -88,3 +88,14 @@ def escape_arg(arg):
 
 def unescape_arg(arg):
     return arg.replace(' ', '\\ ')
+
+def subprocess_call(args):
+    # 对参数组中的unicode字符串进行编码
+    import locale
+    encoding = locale.getpreferredencoding()
+    for i in xrange(len(args)):
+        if type(args[i]) is unicode:
+            args[i] = args[i].encode(encoding)
+    # 创建子进程
+    import subprocess
+    return subprocess.call(args)
