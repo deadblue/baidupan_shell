@@ -20,7 +20,7 @@ import tempfile
 from baidupan import http, util
 import rsa
 
-__all__ = ['client', 'LoginException']
+__all__ = ['BaiduPanClient', 'APIException']
 
 _APP_ID = 250528
 _BAIDUPAN_HOST = 'http://pan.baidu.com/'
@@ -58,27 +58,30 @@ def baidu_api(path, preset={}, post_field=[]):
                     post_data[field] = get_data[field]
                     del get_data[field]
             # 发送请求，出现网络问题时重试
-            retry = True
-            while retry:
+            while True:
                 try:
                     resp = obj.execute_request(url, get_data, post_data)
                     result = json.load(resp)
-                    retry = False
+                    return result
                 except urllib2.HTTPError as he:
                     result = json.load(he)
-                    if result.get('error_code', 0) == -19:
-                        # 下载验证码图片
-                        vcode_image = obj.download_vcode_image(result['img'])
-                        post_data['vcode'] = result['vcode']
-                        post_data['input'] = obj.vcode_handler(vcode_image)
-                        retry = True
-                    else:
-                        retry = False
-                except:
-                    retry = True
-            return result
+                    raise APIException(func.func_name, result.get('error_code'), result)
+                except: pass
         return invoker
     return invoker_creator
+
+def verification_code_handler(func):
+    def invoker(obj, *args, **kwargs):
+        while True:
+            try:
+                return func(obj, *args, **kwargs)
+            except APIException as ae:
+                if ae.error == -19:
+                    vcode_img = obj.download_vcode_image(ae.result['img'])
+                    kwargs['vcode'] = ae.result['vcode']
+                    kwargs['input'] = obj.vcode_handler(vcode_img)
+                else: raise ae
+    return invoker
 
 def _calc_download_sign(sign1, sign2):
     '''
@@ -105,11 +108,13 @@ def _calc_download_sign(sign1, sign2):
         result.append( chr( ord(sign2[i]) ^ tmp ) )
     return base64.b64encode(''.join(result))
 
-class LoginException(Exception):
-    def __init__(self, errno):
-        self.erron = errno
-    def __str__(self, *args, **kwargs):
-        return 'login error: %d' % self.erron
+class APIException(Exception):
+    def __init__(self, func, error, result=None):
+        self.func = func
+        self.error = error
+        self.result = result
+    def __str__(self):
+        return 'api error %d on %s' % (self.error, self.func)
 
 class BaiduPanClient():
 
@@ -138,8 +143,8 @@ class BaiduPanClient():
             # 搜索赋值到yunData上的数据
             ms = re.findall(r'yunData\.([\w_]+)\s*=\s*[\'"](.*?)[\'"];', html)
             if ms is None or len(ms) == 0:
-                raise LoginException(-1)
-            yun_data = dict(ms)
+                raise APIException('login', -1)
+            yun_data = dict((k,v) for k,v in ms)
             # 提取必要的信息
             self.user_name = yun_data['MYNAME']
             self.bdstoken = yun_data['MYBDSTOKEN']
@@ -182,6 +187,7 @@ class BaiduPanClient():
         self._do_login(account, password, token, key_info)
         # 获取登陆信息
         self._get_login_info()
+        return self.is_login
     def _get_login_token(self):
         '''
         获取登陆用token
@@ -273,9 +279,9 @@ class BaiduPanClient():
         if m is not None:
             err_no = int(m.group(1))
             if err_no != 0:
-                raise LoginException(err_no)
+                raise APIException('login', err_no)
         else:
-            raise LoginException(-1)
+            raise APIException('login', -1)
         _logger.debug('login successed!')
 
     def upload(self, savedir, localfile):
@@ -284,6 +290,8 @@ class BaiduPanClient():
         @param savedir: 远端保存路径
         @param localfile: 本地文件完整路径
         '''
+        savedir = util.encode_utf8(savedir)
+        localfile = util.encode_utf8(localfile)
         url = 'https://c.pcs.baidu.com/rest/2.0/pcs/file'
         query = [
             ('method', 'upload'),
@@ -305,14 +313,48 @@ class BaiduPanClient():
             return json.load(resp)
         except urllib2.HTTPError as he:
             return json.load(he)
+    def upload_curl(self, savedir, localfile):
+        '''
+        使用curl上传文件
+        上传大文件时使用此接口，可显示上传进度
+        @param savedir: 远端保存路径
+        @param localfile: 本地文件完整路径
+        '''
+        savedir = util.encode_utf8(savedir)
+        localfile = util.encode_utf8(localfile)
+        url = 'https://c.pcs.baidu.com/rest/2.0/pcs/file'
+        query = [
+            ('method', 'upload'),
+            ('app_id', _APP_ID),
+            ('ondup', 'newcopy'),
+            ('dir', savedir),
+            ('filename', os.path.basename(localfile)),
+            ('BDUSS', urllib.unquote(self.bduss))
+             ]
+        url = '%s?%s' % (url, urllib.urlencode(query))
+        # 创建临时文件用来保存输出结果
+        _, tmp_file = tempfile.mkstemp(suffix='.json')
+        # 调用curl上传文件
+        cmd = ['curl',
+               '-A', _USER_AGENT,
+               '-H', 'Expect:',
+               '-F', 'file=@%s;type=application/octet-stream' % localfile,
+               '-o', tmp_file, url]
+        util.subprocess_call(cmd)
+        # 读取输出结果
+        with open(tmp_file, 'r') as fp:
+            result = json.load(fp)
+        return result
     def upload_data(self, savedir, filename, filedata):
         '''
         上传文件数据
-        :param savedir: 远程保存路径
-        :param filename: 保存文件名
-        :param filedata: 文件数据
-        :return:
+        @param savedir: 远程保存路径
+        @param filename: 保存文件名
+        @param filedata: 文件数据
+        @return:
         '''
+        savedir = util.encode_utf8(savedir)
+        filename = util.encode_utf8(filename)
         url = 'https://c.pcs.baidu.com/rest/2.0/pcs/file'
         query = [
             ('method', 'upload'),
@@ -334,40 +376,6 @@ class BaiduPanClient():
             return json.load(resp)
         except urllib2.HTTPError as he:
             return json.load(he)
-    def upload_curl(self, savedir, localfile):
-        '''
-        使用curl上传文件
-        上传大文件时使用此接口，可显示上传进度
-        @param savedir: 远端保存路径
-        @param localfile: 本地文件完整路径
-        '''
-        url = 'https://c.pcs.baidu.com/rest/2.0/pcs/file'
-        query = [
-            ('method', 'upload'),
-            ('app_id', _APP_ID),
-            ('ondup', 'newcopy'),
-            ('dir', savedir),
-            ('filename', os.path.basename(localfile)),
-            ('BDUSS', urllib.unquote(self.bduss))
-             ]
-        url = '%s?%s' % (url, urllib.urlencode(query))
-        # 创建临时文件用来保存输出结果
-        _, tmp_file = tempfile.mkstemp(suffix='.json')
-        # 调用curl上传文件
-        cmd = ['curl',
-               '-A "%s"' % _USER_AGENT,
-               '-H "Expect:"',
-               '-F "file=@%s;type=application/octet-stream"' % localfile,
-               '-o "%s"' % tmp_file,
-               '"%s"' % url
-        ]
-        cmd = ' '.join(cmd)
-        os.system(cmd)
-        # 读取输出结果
-        fp = open(tmp_file, 'r')
-        result = json.load(fp)
-        fp.close()
-        return result
 
     def get_download_request(self, file_id):
         '''
@@ -518,9 +526,11 @@ class BaiduPanClient():
         @param save_path: 保存路径
         '''
         pass
+    @verification_code_handler
     @baidu_api('rest/2.0/services/cloud_dl', preset={'method':'add_task', 'type':2, 'task_from':2}, 
-                 post_field=['method', 'app_id', 'source_path', 'selected_idx', 'file_sha1', 'save_path', 'task_from', 'type', 't'])
-    def cloud_dl_add_bt_task(self, source_path, selected_idx, file_sha1, save_path):
+                 post_field=['method', 'app_id', 'source_path', 'selected_idx', 'file_sha1',
+                             'save_path', 'task_from', 'type', 't', 'vcode', 'input'])
+    def cloud_dl_add_bt_task(self, source_path, selected_idx, file_sha1, save_path, vcode=None, input=None):
         '''
         添加bt离线任务
         @preset task_from: 意义不明
