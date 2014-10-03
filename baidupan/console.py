@@ -37,7 +37,7 @@ class _Console():
         readline.parse_and_bind('tab: complete')
         readline.set_completer(_completer)
     def run(self):
-        while context.alive:
+        while context.is_alive():
             prompt = 'BaiduPan:%s> ' % context.get_rwd()
             # 获取输入
             line = raw_input(prompt).strip()

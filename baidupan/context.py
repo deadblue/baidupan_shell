@@ -10,10 +10,10 @@ import os
 import sys
 from baidupan import util, config
 
-# 远端当前路径
+_ALIVE = 'alive'
 _RWD = 'rwd'
-# 本地当前路径
 _LWD = 'lwd'
+
 # 上下文数据
 _data = {}
 
@@ -26,11 +26,11 @@ def init():
     log_level = logging.DEBUG if args.get('debug') else logging.ERROR
     logging.basicConfig(level=log_level, stream=log_file,
                         format='%(asctime)s %(levelname)s %(name)s - %(message)s')
+    # 初始化数据
     _data[_RWD] = '/'
     _data[_LWD] = config.get_localhome()
+    _data[_ALIVE] = True
     # 标记为活动
-    global alive
-    alive = True
     # 初始化client
     import cookielib
     from baidupan import api, tree
@@ -39,6 +39,7 @@ def init():
     cookie_jar = cookielib.MozillaCookieJar(cookie_file)
     if os.path.exists(cookie_file): cookie_jar.load()
     client = api.BaiduPanClient(cookie_jar, util.ascii_vcode_handler)
+    # 初始化远程文件树
     remote_tree = tree.RemoteTree(client)
 
 def put(name, value):
@@ -56,9 +57,13 @@ def get_lwd():
 def set_lwd(value):
     put(_LWD, value)
 
+def is_alive():
+    return _data.get(_ALIVE)
+def set_alive(alive):
+    _data[_ALIVE] = alive
+
 # 定义常量
 log_file = None
-alive = None
 cookie_file = None
 cookie_jar = None
 client = None
