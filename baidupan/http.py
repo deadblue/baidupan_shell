@@ -5,12 +5,24 @@ Created on 2014/07/04
 @author: deadblue
 '''
 
-from baidupan import util
 import string
 import urllib2
 import os
 
-__all__ = ['StringPart', 'FilePart', 'MultipartRequest']
+__all__ = ['StringPart', 'FilePart', 'FileDataPart', 'MultipartRequest']
+
+def _create_boundary():
+    import random
+    buf = ['----']
+    for _ in xrange(16):
+        buf.append(random.choice(string.ascii_letters))
+    return ''.join(buf)
+
+def _join(array):
+    for i in xrange(len(array)):
+        if type(array[i]) is unicode:
+            array[i] = array[i].encode('utf-8')
+    return ''.join(array)
 
 class Part():
     def __init__(self, name):
@@ -37,7 +49,7 @@ class FilePart(Part):
     def get_data(self):
         buf = ['Content-Disposition: form-data; name="%s"; filename="%s"\r\n' % (self.name, self.filename),
                'Content-Type: application/octet-stream\r\n\r\n', self.filedata, '\r\n']
-        return ''.join(buf)
+        return _join(buf)
 
 class FileDataPart(Part):
     def __init__(self, name, filename, filedata):
@@ -47,12 +59,12 @@ class FileDataPart(Part):
     def get_data(self):
         buf = ['Content-Disposition: form-data; name="%s"; filename="%s"\r\n' % (self.name, self.filename),
                'Content-Type: application/octet-stream\r\n\r\n', self.filedata, '\r\n']
-        return ''.join(buf)
+        return _join(buf)
 
 class MultipartRequest(urllib2.Request):
     def __init__(self, url, headers={}):
         urllib2.Request.__init__(self, url, headers=headers)
-        self.boundary = '----%s' % util.random_str(string.ascii_letters, 16)
+        self.boundary = _create_boundary()
         self.headers['Content-Type'] = 'multipart/form-data; boundary=%s' % self.boundary
     def set_parts(self, parts):
         if len(parts) == 0: return
@@ -61,4 +73,7 @@ class MultipartRequest(urllib2.Request):
             buf.append('--%s\r\n' % self.boundary)
             buf.append(part.get_data())
         buf.append('--%s--\r\n' % self.boundary)
-        self.data = ''.join(buf)
+        self.data = _join(buf)
+
+if __name__ == '__main__':
+    print _create_boundary()
