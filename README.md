@@ -3,8 +3,8 @@ baidupan_shell
 
 ## 项目简介
 百度盘管理终端  
-**使用说明逐步移至wiki中**
-**MacOSX下测试通过，正在进行对Windows的兼容**  
+**使用说明逐步移至wiki中**  
+**MacOSX下测试通过，Windows下的编码问题基本解决**  
 
 ## 环境要求
 已更新到wiki  
