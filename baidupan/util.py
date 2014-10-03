@@ -42,6 +42,9 @@ def random_str(source, length):
         buf.append(random.choice(source))
     return ''.join(buf)
 
+def encode_utf8(s):
+    return s.encode('utf-8') if type(s) is unicode else s
+
 def default_vcode_handler(img_data):
     import tempfile
     _, tmp_file_path = tempfile.mkstemp(suffix='.jpg')
