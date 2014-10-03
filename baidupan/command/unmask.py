@@ -20,7 +20,7 @@ class UnmaskCommand(Command):
         target_dir = args[0]
         dir_objs = context.remote_tree.list_dir(context.get_rwd())
         for dir_obj in dir_objs:
-            if dir_obj['server_filename'].encode('utf-8') == target_dir:
+            if dir_obj['server_filename'] == target_dir:
                 self._unmask_start(dir_obj)
                 break
     def _unmask_start(self, dir_obj):

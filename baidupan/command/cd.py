@@ -33,5 +33,5 @@ class ChangeDirectoryCommand(Command):
         target_path = tree.remote_abspath(target_path)
         parent_dir, name_prefix = tree.remote_splitpath(target_path)
         dirs = context.remote_tree.list_dir(parent_dir)
-        dir_names = map(lambda x:'%s/' % util.unescape_arg(x['server_filename'].encode('utf-8')), dirs)
+        dir_names = map(lambda x:'%s/' % util.unescape_arg(x['server_filename']), dirs)
         return filter(lambda x:len(name_prefix)==0 or x.startswith(name_prefix), dir_names)

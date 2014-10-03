@@ -91,8 +91,7 @@ class RemoteTree():
         if dir_path.endswith('/'): dir_path = dir_path[:-1]
         parent_dir, name = remote_splitpath(dir_path)
         dirs = self.list_dir(parent_dir)
-        # python2处理unicode真是奇葩
-        dir_names = map(lambda x:x['server_filename'].encode('utf-8'), dirs)
+        dir_names = map(lambda x:x['server_filename'], dirs)
         return name in dir_names
     def rename(self, file_path, new_name):
         op = [{'path':file_path, 'newname':new_name}]
