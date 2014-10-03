@@ -5,19 +5,23 @@ Created on 2014/07/05
 @author: deadblue
 '''
 
-from baidupan import context
-from baidupan.command import manager
+import locale
 import readline
 import traceback
 import logging
 
+from baidupan import context
+from baidupan.command import manager
+
+
 __all__ = ['run']
 
+_encoding = locale.getpreferredencoding()
 _logger = logging.getLogger('console')
 
 def _completer(prefix, index):
     # 获取当前行
-    line = readline.get_line_buffer()
+    line = readline.get_line_buffer().decode(_encoding)
     cmd, args = manager.parse_input(line)
     words = []
     if cmd is None:
@@ -38,9 +42,9 @@ class _Console():
         readline.set_completer(_completer)
     def run(self):
         while context.is_alive():
-            prompt = 'BaiduPan:%s> ' % context.get_rwd()
+            prompt = ('BaiduPan:%s> ' % context.get_rwd()).encode(_encoding)
             # 获取输入
-            line = raw_input(prompt).strip()
+            line = raw_input(prompt).strip().decode(_encoding)
             # 跳过空行
             if len(line) == 0: continue
             # 解析命令和参数
