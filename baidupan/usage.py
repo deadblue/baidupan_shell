@@ -20,26 +20,20 @@ def _get_fullname(shortname):
 
 def parse_arguments(args=sys.argv[1:]):
     arg_dict = {}
+    last_arg_name = None
     for arg in args:
-        if arg.startswith('--'):
-            arg_name = arg[2:]
-            eq_pos = arg_name.find('=')
-            if eq_pos >= 0:
-                arg_value = arg_name[eq_pos + 1:]
-                arg_name = arg_name[0:eq_pos]
+        if arg.startswith('-'):
+            if arg.startswith('--'):
+                arg_name = arg[2:]
             else:
-                arg_value = True
-        elif arg.startswith('-'):
-            arg_name = arg[1:]
-            eq_pos = arg_name.find('=')
-            if eq_pos >= 0:
-                arg_value = arg_name[eq_pos + 1:]
-                arg_name = arg_name[0:eq_pos]
-            else:
-                arg_value = True
-            arg_name = _get_fullname(arg_name)
-        if arg_name is None: continue
-        arg_dict[arg_name] = arg_value
+                arg_name = arg[1:]
+                arg_name = _get_fullname(arg_name)
+            last_arg_name = arg_name
+            arg_dict[arg_name] = True
+        else:
+            if last_arg_name is None: continue
+            arg_dict[last_arg_name] = arg
+            last_arg_name = None
     return arg_dict
 
 def print_usage():
@@ -48,7 +42,7 @@ def print_usage():
     def _format(info):
         form = None
         if info[2]:
-            form = '-%s, --%s=<%s>' % (info[0], info[1], info[2])
+            form = '-%s, --%s <%s>' % (info[0], info[1], info[2])
         else:
             form = '-%s, --%s' % (info[0], info[1])
         return '  %-33s%s' % (form, info[3])
