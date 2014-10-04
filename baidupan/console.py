@@ -41,6 +41,8 @@ class _Console():
         readline.parse_and_bind('tab: complete')
         readline.set_completer(_completer)
     def run(self):
+        if context.client.is_login:
+            print 'login user: %s' % context.client.user_name
         while context.is_alive():
             prompt = ('BaiduPan:%s> ' % context.get_rwd()).encode(_encoding)
             # 获取输入
@@ -65,21 +67,11 @@ def run(args):
     account = args.get('account')
     password = args.get('password')
     if account:
-        # 若传入了账户，则使用传入的账号登录
         print 'Login as <%s> ...' % account
         if password is None:
             password = getpass.getpass('Password: ')
-    else:
-        # 若无法使用cookie登录，则提示登录
-        if not context.client.is_login:
-            account = raw_input('Account: ')
-            password = getpass.getpass('Password: ')
-    if account is not None:
         context.client.login(account, password)
         context.cookie_jar.save()
-    if context.client.is_login:
-        # 初始化命令管理器
-        manager.init()
-        _Console().run()
-    else:
-        print 'Login failed!'
+    # 初始化命令管理器
+    manager.init()
+    _Console().run()
