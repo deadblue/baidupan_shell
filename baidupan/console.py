@@ -5,6 +5,7 @@ Created on 2014/07/05
 @author: deadblue
 '''
 
+import getpass
 import locale
 import readline
 import traceback
@@ -12,7 +13,6 @@ import logging
 
 from baidupan import context
 from baidupan.command import manager
-
 
 __all__ = ['run']
 
@@ -60,10 +60,26 @@ class _Console():
                 cmd.execute(args)
             except:
                 traceback.print_exc()
-        # 流程结束时保存cookie
-        context.cookie_jar.save()
 
-def run():
-    # 初始化命令管理器
-    manager.init()
-    _Console().run()
+def run(args):
+    account = args.get('account')
+    password = args.get('password')
+    if account:
+        # 若传入了账户，则使用传入的账号登录
+        print 'Login as <%s> ...' % account
+        if password is None:
+            password = getpass.getpass('Password: ')
+    else:
+        # 若无法使用cookie登录，则提示登录
+        if not context.client.is_login:
+            account = raw_input('Account: ')
+            password = getpass.getpass('Password: ')
+    if account is not None:
+        context.client.login(account, password)
+        context.cookie_jar.save()
+    if context.client.is_login:
+        # 初始化命令管理器
+        manager.init()
+        _Console().run()
+    else:
+        print 'Login failed!'
