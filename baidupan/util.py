@@ -60,32 +60,6 @@ def ascii_vcode_handler(img_data):
     # 提示用户输入看到的验证码
     return raw_input('The CODE you see above: ')
 
-def parser_arguments(argv):
-    arg_map = {}
-    arg_name = None
-    for arg in argv:
-        if arg.startswith('-'):
-            # 以-开头表示参数名
-            if arg_name and not arg_map.has_key(arg_name):
-                arg_map[arg_name] = True
-            arg_name = arg[1:]
-        else:
-            # 否则为参数值
-            if arg_name is None: continue
-            if arg_map.has_key(arg_name):
-                arg_val = arg_map[arg_name]
-                if type(arg_val) is list:
-                    arg_val.append(arg)
-                else:
-                    arg_val = [arg_val, arg]
-                    arg_map[arg_name] = arg_val
-            else:
-                arg_map[arg_name] = arg
-    # 最终处理
-    if arg_name and not arg_map.has_key(arg_name):
-        arg_map[arg_name] = True
-    return arg_map
-
 def escape_arg(arg):
     return arg.replace('\\ ', ' ')
 
