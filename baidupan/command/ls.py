@@ -24,10 +24,8 @@ class ListCommand(Command):
                                              show_exts=exts, force_fetch=True)
         self._print_file_list(file_list)
     def _print_file_list(self, files):
-        print '| %-16s | %-19s | %-10s | %s' % ('file_id', 'modify_time', 'size', 'name')
-        print '+%s+%s+%s+%s' % ('-' * 18, '-' * 21, '-' * 12, '-' * 10)
+        print '| %-16s | %-10s | %s' % ('file_id', 'size', 'name')
+        print '+%s+%s+%s' % ('-' * 18, '-' * 12, '-' * 10)
         for fl in files:
             file_size = '<DIR>' if fl['isdir'] == 1 else util.format_size(fl['size'])
-            print '| %-16d | %-19s | %10s | %s' % (fl['fs_id'],
-                                      util.format_time(fl['server_mtime']),
-                                      file_size, fl['server_filename'])
+            print '| %-16d | %10s | %s' % (fl['fs_id'], file_size, fl['server_filename'])
