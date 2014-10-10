@@ -110,6 +110,7 @@ def _calc_download_sign(sign1, sign2):
 
 class APIException(Exception):
     def __init__(self, func, error, result=None):
+        Exception.__init__(self)
         self.func = func
         self.error = error
         self.result = result
