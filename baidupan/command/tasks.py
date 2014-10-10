@@ -23,13 +23,10 @@ class TaskListCommand(Command):
             result = context.client.cloud_dl_query_task(task_ids)
             self._print_tasks(result['task_info'])
     def _print_tasks(self, tasks):
-        print '| %-16s | %-19s | %-7s | %s ' % ('task_id', 'create_time', 'precent', 'name')
-        print '+%s+%s+%s+%s' % ('-' * 18, '-' * 21, '-' * 9, '-' * 10)
+        print '| %-16s | %-7s | %s ' % ('task_id', 'precent', 'name')
+        print '+%s+%s+%s' % ('-' * 18, '-' * 9, '-' * 10)
         for task_id, task_info in tasks.items():
             create_time = int(task_info['create_time'])
             dl_per = 100.0 * int(task_info['finished_size']) / int(task_info['file_size'])
-            print '| %-16s | %-19s | %6.2f%% | %s' % (task_id,
-                                                      util.format_time(create_time),
-                                                      dl_per, 
-                                                      task_info['task_name']
-                                                      )
+            print '| %-16s | %6.2f%% | %s' % (task_id, dl_per,
+                                                      task_info['task_name'])
