@@ -24,7 +24,10 @@ class CloudDownloadCommand(Command):
         else:
             # 判断是否需要混淆名称
             mask = '--mask' in args
-            self._download(args[-1], mask)
+            # 批量创建任务
+            for source in args:
+                if source.startswith('--'): continue
+                self._download(source, mask)
 
     def _download(self, source, mask=False):
         task_id = None
@@ -34,6 +37,8 @@ class CloudDownloadCommand(Command):
             task_id = self._download_ed2k(source)
         elif source.endswith('.torrent'):
             task_id = self._download_torrent(source, mask)
+        elif source.endswith('.txt'):
+            pass
         # elif source.startswith('ftp:'):
         #     task_id = self._download_ftp(source)
         # elif source.startswith('magnet:'):
@@ -90,21 +95,24 @@ class CloudDownloadCommand(Command):
             print 'no such torrent file!'
             return None
         # 获取种子文件信息
-        print 'query torrent info ...'
-        result = context.client.cloud_dl_query_bt_info(source_path)
-        bt_info = result.get('torrent_info')
-        # 创建bt任务
-        task_id = None
-        if bt_info is None:
-            print 'can\'t get torrent info!'
-        else:
-            print 'create download for bt ...'
-            # 选择种子中的全部文件
-            selected_idx = map(lambda x:str(x+1), xrange(0, bt_info['file_count']))
-            selected_idx = ','.join(selected_idx)
-            # 创建离线下载任务
-            result = context.client.cloud_dl_add_bt_task(source_path, selected_idx, bt_info['sha1'], save_path)
-            task_id = result['task_id'] if result.has_key('task_id') else None
+        try:
+            print 'query torrent info ...'
+            result = context.client.cloud_dl_query_bt_info(source_path)
+            bt_info = result.get('torrent_info')
+            # 创建bt任务
+            task_id = None
+            if bt_info is None:
+                print 'can\'t get torrent info!'
+            else:
+                print 'create download for bt ...'
+                # 选择种子中的全部文件
+                selected_idx = map(lambda x:str(x+1), xrange(0, bt_info['file_count']))
+                selected_idx = ','.join(selected_idx)
+                # 创建离线下载任务
+                result = context.client.cloud_dl_add_bt_task(source_path, selected_idx, bt_info['sha1'], save_path)
+                task_id = result['task_id'] if result.has_key('task_id') else None
+        except:
+            print 'create download task failed ...'
         # 删除种子文件
         print 'delete torrent file ...'
         context.client.delete(json.dumps([source_path]))
