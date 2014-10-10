@@ -15,10 +15,13 @@ class TaskListCommand(Command):
         # 获取离线任务列表
         result = context.client.cloud_dl_list_task()
         task_ids = map(lambda x:x['task_id'], result['task_info'])
-        task_ids = ','.join(task_ids)
-        # 查询离线任务详细信息
-        result = context.client.cloud_dl_query_task(task_ids)
-        self._print_tasks(result['task_info'])
+        if len(task_ids) == 0:
+            print 'no download tasks!'
+        else:
+            # 查询离线任务详细信息
+            task_ids = ','.join(task_ids)
+            result = context.client.cloud_dl_query_task(task_ids)
+            self._print_tasks(result['task_info'])
     def _print_tasks(self, tasks):
         print '| %-16s | %-19s | %-7s | %s ' % ('task_id', 'create_time', 'precent', 'name')
         print '+%s+%s+%s+%s' % ('-' * 18, '-' * 21, '-' * 9, '-' * 10)
