@@ -44,22 +44,23 @@ class _Console():
         if context.client.is_login:
             print 'login user: %s' % context.client.user_name
         while context.is_alive():
-            prompt = ('BaiduPan:%s> ' % context.get_rwd()).encode(_encoding)
-            # 获取输入
-            line = raw_input(prompt).strip().decode(_encoding)
-            # 跳过空行
-            if len(line) == 0: continue
-            # 解析命令和参数
-            cmd, args = manager.parse_input(line)
-            if cmd is None:
-                print 'No such command'
-                continue
-            if cmd.need_login and not context.client.is_login:
-                print 'You MUST login before use %s' % cmd.name
-                continue
-            # 执行命令
             try:
+                prompt = ('BaiduPan:%s> ' % context.get_rwd()).encode(_encoding)
+                # 获取输入
+                line = raw_input(prompt).strip().decode(_encoding)
+                # 跳过空行
+                if len(line) == 0: continue
+                # 解析命令和参数
+                cmd, args = manager.parse_input(line)
+                if cmd is None:
+                    print 'No such command'
+                    continue
+                if cmd.need_login and not context.client.is_login:
+                    print 'You MUST login before use %s' % cmd.name
+                    continue
                 cmd.execute(args)
+            except KeyboardInterrupt:
+                print
             except:
                 traceback.print_exc()
 
