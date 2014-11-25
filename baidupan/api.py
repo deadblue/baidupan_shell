@@ -385,7 +385,7 @@ class BaiduPanClient():
         '''
         fids = file_id if type(file_id) is list else [file_id]
         result = self.download_link(self.download_sign, self.timpstamp, json.dumps(fids))
-        if result.get('errno') == 112:
+        if result.get('errno') != 0:
             # 签名超时，刷新签名重新获取
             self._get_login_info()
             result = self.download_link(self.download_sign, self.timpstamp, json.dumps(fids))
@@ -518,9 +518,10 @@ class BaiduPanClient():
         @param source_path: 种子文件路径（必须存在于网盘上）
         '''
         pass
+    @verification_code_handler
     @baidu_api('rest/2.0/services/cloud_dl', preset={'method':'add_task'},
-               post_field=['method', 'app_id', 'source_url', 'save_path'])
-    def cloud_dl_add_http_task(self, source_url, save_path):
+               post_field=['method', 'app_id', 'source_url', 'save_path' 'vcode', 'input'])
+    def cloud_dl_add_http_task(self, source_url, save_path, vcode=None, input=None):
         '''
         创建http离线任务
         @param source_url: 下载地址
@@ -541,9 +542,10 @@ class BaiduPanClient():
         @param save_path: 网盘上的保存路径
         '''
         pass
+    @verification_code_handler
     @baidu_api('rest/2.0/services/cloud_dl', preset={'method':'add_task', 'type':3},
-               post_field=['method', 'app_id', 'source_url', 'save_path', 'type'])
-    def cloud_dl_add_ed2k_task(self, source_url, save_path):
+               post_field=['method', 'app_id', 'source_url', 'save_path', 'type' 'vcode', 'input'])
+    def cloud_dl_add_ed2k_task(self, source_url, save_path, vcode=None, input=None):
         '''
         添加ed2k离线任务
         @param source_url: ed2k链接
