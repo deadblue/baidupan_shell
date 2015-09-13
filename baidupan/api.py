@@ -279,7 +279,8 @@ class BaiduPanClient():
         m = re.search('err_no=(\d+)&', body)
         if m is not None:
             err_no = int(m.group(1))
-            if err_no != 0:
+            # err_no=18 表示需要手机认证，这个错误目前可忽略
+            if err_no != 0 and err_no != 18:
                 raise APIException('login', err_no)
         else:
             raise APIException('login', -1)
