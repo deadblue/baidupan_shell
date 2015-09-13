@@ -19,7 +19,7 @@ _data = {}
 
 def init(args):
     # 设置日志级别
-    debug_mode = args.get('debug')
+    debug_mode = args.debug
     log_file = file(os.path.join(os.getcwd(), 'debug.log'), 'w') if debug_mode else sys.stderr
     log_level = logging.DEBUG if debug_mode else logging.ERROR
     logging.basicConfig(level=log_level, stream=log_file,
@@ -28,7 +28,7 @@ def init(args):
     _data['alive'] = True
     _data[_RWD] = '/'
     # 本地工作目录
-    lwd = args.get('local')
+    lwd = args.local_dir
     if lwd and os.path.exists(lwd):
         lwd = os.path.abspath(lwd)
     else:
@@ -38,11 +38,11 @@ def init(args):
     _data[_LWD] = lwd
     # cookie文件
     global cookie_file
-    cookie_file = args.get('cookie')
-    if cookie_file:
-        cookie_file = os.path.abspath(cookie_file)
-    else:
-        cookie_file = util.get_data_file('.baidupan.cookie')
+    # cookie_file = args.get('cookie')
+    # if cookie_file:
+    #     cookie_file = os.path.abspath(cookie_file)
+    # else:
+    cookie_file = util.get_data_file('.baidupan.cookie')
     # 初始化client
     import cookielib
     from baidupan import api, tree

@@ -35,7 +35,7 @@ def _completer(prefix, index):
         words = cmd.get_completer_words(arg_prefix)
     return words[index] if words and index < len(words) else None
 
-class _Console():
+class _Console:
     def __init__(self):
         # 绑定readline
         readline.parse_and_bind('tab: complete')
@@ -65,8 +65,8 @@ class _Console():
                 traceback.print_exc()
 
 def run(args):
-    account = args.get('account')
-    password = args.get('password')
+    account = args.account
+    password = args.password
     if account:
         print 'Login as <%s> ...' % account
         if password is None:

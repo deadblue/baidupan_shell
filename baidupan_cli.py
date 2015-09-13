@@ -6,23 +6,30 @@ Created on 2014/07/05
 @author: deadblue
 '''
 
-from baidupan import config, context, usage
+import argparse
+import sys
+
+from baidupan import config
 
 def on_exit():
     config.save()
 
+def _main(args):
+    # 使用现成的库处理传入的参数
+    parser = argparse.ArgumentParser('baidupan_cli.py')
+    parser.add_argument('-a', '--account')
+    parser.add_argument('-p', '--password')
+    parser.add_argument('-ld', '--local_dir')
+    parser.add_argument('--debug', action='store_true')
+    opts, args = parser.parse_known_args(args)
+
+    from baidupan import config
+    config.load()
+    from baidupan import context
+    context.init(opts)
+    from baidupan import console
+    console.run(opts)
+
 if __name__ == '__main__':
-    # 参数处理
-    args = usage.parse_arguments()
-    if args.get('help'):
-        usage.print_usage()
-    else:
-        import atexit
-        atexit.register(on_exit)
-        # 加载配置
-        config.load()
-        # 初始化运行环境
-        context.init(args)
-        # 启动文字终端
-        from baidupan import console
-        console.run(args)
+    _main(sys.argv[1:])
+
